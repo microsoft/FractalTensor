@@ -1,14 +1,46 @@
-# Project
+# Program Neural Network with FractalTensor
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+**Optimize programming neural network applications for both modern parallel computers and modern programmers!**
 
-As the maintainer of this project, please make a few updates:
+As deep learning models become more and more complex, it is more and more important to structure them well. Well-structured and modular programs are easy to write and are more tractable for a compiler to reason and generate efficient codes for a variety of parallel computers.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+However, an important challenge is how _**one can divide up the original problem into sub-solutions depend directly on how one can glue sub-solutions together**_. FractalTensor embraces functional style programming for an easier auto-parallelization and explores two powerful glue in functional programming: high-order function and lazy evaluation.
+
+In FractalTensor, the assignment is interpreted as variable binding. All primitive operations (functions) have no effect other than to compute its result. This is to make the order of execution irrelevant and relieves the programmer of the burden of prescribing the flow of control.
+
+The goals of FractalTensor are to:
+1. provide a set of _data-parallel_ constructs to uncover and exploit _nested_ parallelisms hidden in neural network applications; These constructs could be embedded into a sequential language.
+1. provide compile-time analysis techniques to glue the proposed constructs together to generate efficient evaluation codes/plans for a variety of parallel computers.
+
+<p align="center">
+<img src="docs/images/overview.png"><br>
+</p>
+
+## Usage
+### Clone Project
+```bash
+## Clone project
+git clone git@github.com:lcy-seso/FractalTensor.git
+cd FractalTensor
+```
+
+### Build from souece
+```bash
+export CUDNN_HOME=...
+make build CUDNN_HOME=$CUDNN_HOME
+```
+
+### Test
+#### FrontEnd:
+```bash
+make install-python
+make test-frontend
+```
+
+#### BackEnd:
+```bash
+make test-backend
+```
 
 ## Contributing
 
