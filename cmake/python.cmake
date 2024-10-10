@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+# MIT License.
+# --------------------------------------------------------------------------
+
 # FIXME(Ying): This may lead to runtime error if users have multiple locally
 # installed Pythons. To avoid runtime error, it is better to explicitly specify
 # which python is in use through: cmake -DPYTHON_EXECUTABLE:FILEPATH=`which

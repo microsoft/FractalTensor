@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "kaleido/core/device/gpu_context.h"
 #include "kaleido/core/device/kernels/softmax.h"
 #include "kaleido/core/operators/softmax_op.h"

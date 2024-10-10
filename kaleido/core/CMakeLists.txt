@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+# MIT License.
+# --------------------------------------------------------------------------
+
 set(TARGET fractaltensor_core)
 
 include_directories("${PROJECT_SOURCE_DIR}")

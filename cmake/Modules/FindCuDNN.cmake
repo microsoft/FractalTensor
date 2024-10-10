@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+# MIT License.
+# --------------------------------------------------------------------------
+
 # This module will set the following variables in your project::
 #
 # ``CUDNN_FOUND`` True if CUDNN found on the local system

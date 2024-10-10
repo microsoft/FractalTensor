@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+# MIT License.
+# --------------------------------------------------------------------------
+
 include(ExternalProject)
 
 set(CUTLASS_PREFIX_DIR ${THIRD_PARTY_PATH}/cutlass)

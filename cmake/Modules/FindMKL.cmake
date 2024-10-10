@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+# MIT License.
+# --------------------------------------------------------------------------
+
 if(MKL_INCLUDE_DIRS
    AND MKL_LIBRARIES
    AND MKL_INTERFACE_LIBRARY
