@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "../../../build/third_party/tvm/src/extern_tvm/src/runtime/cuda/cuda_device_api.cc"
 #include "../../../build/third_party/tvm/src/extern_tvm/src/runtime/cuda/cuda_module.cc"
 

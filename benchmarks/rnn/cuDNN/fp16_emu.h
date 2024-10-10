@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 // Conversion from/to 16-bit floating point (half-precision).
 
 #if !defined(_FP16_EMU_H_)

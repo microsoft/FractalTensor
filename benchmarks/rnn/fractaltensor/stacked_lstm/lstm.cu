@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "../../cuDNN/RNN_example.h"
 #include "../../cuDNN/utils.h"
 #include "kaleido/core/cuda_allocator.h"
