@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# --------------------------------------------------------------------------
+
 from tf_model.rnn import WhileOpLstmNet
 from tf_model.rnn import FineGrainedOpLstmNet
 from tf_model.rnn import StaticRNN
