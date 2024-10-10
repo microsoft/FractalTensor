@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+# MIT License.
+# --------------------------------------------------------------------------
+
 set(THIRD_PARTY_PATH
     "${CMAKE_BINARY_DIR}/third_party"
     CACHE STRING

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "kaleido/core/tensor_shape.h"
 
 namespace kaleido {

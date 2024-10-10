@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "kaleido/core/device/gpu_context.h"
 #include "kaleido/core/device/kernels/gather_scatter.h"
 #include "kaleido/core/operators/scatter_nd_op.h"

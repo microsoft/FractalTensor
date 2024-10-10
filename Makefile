@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# --------------------------------------------------------------------------
+
 CUDNN_HOME ?=
 BUILD_DIR := build
 BENCHMARK_DIR := benchmarks

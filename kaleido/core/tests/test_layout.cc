@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "kaleido/core/cuda_allocator.h"
 #include "kaleido/core/layout.h"
 

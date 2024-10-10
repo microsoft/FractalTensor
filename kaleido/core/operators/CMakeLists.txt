@@ -1,3 +1,8 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+# MIT License.
+# --------------------------------------------------------------------------
+
 op_library(fill_op DEPS ${CUDA_curand_LIBRARY})
 op_library(concat_op)
 op_library(transpose_op)

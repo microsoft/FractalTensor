@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 #include "kaleido/core/device/cuda_info.h"
 #include "kaleido/core/device/cuda_utils.h"
 #include "kaleido/core/device/gpu_context.h"

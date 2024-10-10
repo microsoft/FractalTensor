@@ -1,3 +1,7 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# --------------------------------------------------------------------------
 """All types considered in the computational process:
 
 1. Basic arithmetic type: Number including float(16, 32, 64), integer(16, 32, 64), bool
