@@ -17,14 +17,17 @@ The goals of FractalTensor are to:
 </p>
 
 ## Usage
+
 ### Clone Project
+
 ```bash
 ## Clone project
-git clone git@github.com:lcy-seso/FractalTensor.git
+git clone git@github.com:microsoft/FractalTensor.git
 cd FractalTensor
 ```
 
 ### Build from souece
+
 ```bash
 export CUDNN_HOME=...
 make build CUDNN_HOME=$CUDNN_HOME
