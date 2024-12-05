@@ -36,10 +36,14 @@
 1. [Information query](fractaltensor_operations/information_query.md)
 1. Access operations of FractalTensor
 
-   Throughout the documents, `*` before an operation means it is a performance-critical operation that requires backend's first-class implementation. All the other operations (1) can be built out of these performance-critical primitives with at most a constant overhead; or (2) manipulate meta information of data with low runtime overhead.
+   Throughout the documents, `*` before an operation means it is a performance-critical operation that requires backend's first-class implementation and will not be looked into in XXX's program analysis. All the other operations (1) can be built out of these performance-critical primitives with at most a constant overhead; or (2) manipulate meta information of data with low runtime overhead.
 
    - [Access primitives](fractaltensor_operations/access_primitives.md)
    - [Extended access operations](fractaltensor_operations/extended_access_operations.md)
    - [Access multiple FractalTensors simultaneously](fractaltensor_operations/access_multiple_factaltensors.md)
 
 ### [Tensor and Tensor operations](tensor_operations.md)
+
+# [Internal representation](internal_representation/README.md)
+
+[TBD]

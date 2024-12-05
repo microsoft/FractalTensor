@@ -1,18 +1,24 @@
 # Program Neural Network with FractalTensor
 
-FractalTensor is a programming framework that introduces a novel approach to organizing data in deep neural networks (DNNs) as a list of lists of statically-shaped tensors, referred to as a FractalTensor. It supports advanced functional list operations, including array compute operators inherited from second-order array combinators (SOACs) such as map, reduce, and scan, as well as first-order array access operators. These high-level operators can be applied to process the nested structure of FractalTensor variables, explicitly revealing opportunities for exploiting nested data parallelism and access locality through automatic compiler analysis.
+**Optimize programming neural network applications for both modern parallel computers and modern programmers!**
+
+As deep learning models become more and more complex, it is more and more important to structure them well. Well-structured and modular programs are easy to write and are more tractable for a compiler to reason and generate efficient codes for a variety of parallel computers.
+
+However, an important challenge is how _**one can divide up the original problem into sub-solutions depend directly on how one can glue sub-solutions together**_. FractalTensor embraces functional style programming for an easier auto-parallelization and explores two powerful glue in functional programming: high-order function and lazy evaluation.
+
+In FractalTensor, the assignment is interpreted as variable binding. All primitive operations (functions) have no effect other than to compute its result. This is to make the order of execution irrelevant and relieves the programmer of the burden of prescribing the flow of control.
+
+The goals of FractalTensor are to:
+1. provide a set of _data-parallel_ constructs to uncover and exploit _nested_ parallelisms hidden in neural network applications; These constructs could be embedded into a sequential language.
+1. provide compile-time analysis techniques to glue the proposed constructs together to generate efficient evaluation codes/plans for a variety of parallel computers.
 
 <p align="center">
-<img src="assets/FractalTensor_overview.png"><br>
+<img src="docs/images/overview.png"><br>
 </p>
-
-As illustrated, the FractalTensor framework consists of three components that can function independently. We have separated these components into individual projects: (1) the front-end programming interface (in this repository), (2) [the intermediate representation (IR)](https://github.com/TiledTensor/TiledLower), and (3) a tile processing library called [TileFusion]( https://github.com/microsoft/TileFusion), which we developed to elevate CUDA C’s level of abstraction for processing tiles.
-
-FractalTensor is not currently under active refactoring and development.
 
 ## Usage
 
-### Clone the project
+### Clone Project
 
 ```bash
 ## Clone project
@@ -20,33 +26,23 @@ git clone git@github.com:microsoft/FractalTensor.git
 cd FractalTensor
 ```
 
-### Build from source
+### Build from souece
 
 ```bash
 export CUDNN_HOME=...
 make build CUDNN_HOME=$CUDNN_HOME
 ```
 
-## Publication
+### Test
+#### FrontEnd:
+```bash
+make install-python
+make test-frontend
+```
 
-For more technical details, please refer to our paper:
-
-```bibtex
-@inproceedings{
-  fractaltensor,
-  title={Uncovering Nested Data Parallelism and Data Reuse in DNN Computation with FractalTensor},
-  author={Liu Siran and
-          Qi Chengxiang and
-          Cao Ying and
-          Yang Chao and
-          Hu Weifang and
-          Shi Xuanhua and
-          Yang Fan and
-          Yang Mao},
-  booktitle={Proceedings of the ACM SIGOPS 30th Symposium on Operating Systems Principles},
-  pages={160--177},
-  year={2024}
-}
+#### BackEnd:
+```bash
+make test-backend
 ```
 
 ## Contributing
