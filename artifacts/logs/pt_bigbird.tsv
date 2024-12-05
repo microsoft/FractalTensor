@@ -1,0 +1,4 @@
+STAGE:2024-08-21 14:07:32 1801213:1801213 ActivityProfilerController.cpp:314] Completed Stage: Warm Up
+STAGE:2024-08-21 14:07:32 1801213:1801213 ActivityProfilerController.cpp:320] Completed Stage: Collection
+STAGE:2024-08-21 14:07:32 1801213:1801213 ActivityProfilerController.cpp:324] Completed Stage: Post Processing
+block_size: 64, seq_length: 4096, batch_size: 32, hidden_size: 512, PyTorch(ms): 28.07ms

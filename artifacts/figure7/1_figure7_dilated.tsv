@@ -1,0 +1,4 @@
+Experiment Name	hidden 256	hidden 512	hidden 1024
+ft dilated(ms)	2.0808	2.8597	5.2559
+pt(ms)	2.7061	4.7363	12.0854
+triton(ms)	8.5657	8.9541	20.2515

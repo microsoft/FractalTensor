@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package kaleido.core;
+
+message VarType {
+    enum DataType {
+        BOOL = 0;
+        INT32 = 1;
+        INT64 = 2;
+        FP32 = 3;
+        FP64 = 4;
+    }
+
+    DataType type = 1;
+
+    message TensorTypeDesc {
+        DataType dtype = 1;
+        repeated int64 dims = 2;
+        string place = 3;
+    }
+
+    message FractalTensorTypeDesc {
+        TensorTypeDesc dtype = 1;
+        int64 depth = 2;
+        repeated bool is_static = 3;
+    }
+}

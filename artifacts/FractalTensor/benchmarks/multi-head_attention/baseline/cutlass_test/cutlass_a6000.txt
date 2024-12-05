@@ -1,0 +1,288 @@
+length = 1536, nheads =  16, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 64, 64, 16, 12}.
+
+    Runtime: 1.68085 ms
+    GFLOPs: 87047.7
+
+Passed
+length = 1536, nheads =  32, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 64, 64, 32, 12}.
+
+    Runtime: 3.55564 ms
+    GFLOPs: 82299.7
+
+Passed
+length = 1536, nheads =  32, head_size = 80, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 80, 80, 32, 12}.
+
+    Runtime: 7.12228 ms
+    GFLOPs: 51262.4
+
+Passed
+length = 1536, nheads =  32, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 128, 128, 32, 12}.
+
+    Runtime: 8.07004 ms
+    GFLOPs: 72185.2
+
+Passed
+length = 1536, nheads =  40, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 128, 128, 40, 12}.
+
+    Runtime: 10.5764 ms
+    GFLOPs: 68848.6
+
+Passed
+length = 1536, nheads =  56, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 128, 128, 56, 12}.
+
+    Runtime: 14.7115 ms
+    GFLOPs: 69295.8
+
+Passed
+length = 1536, nheads =  72, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 128, 128, 72, 12}.
+
+    Runtime: 18.7096 ms
+    GFLOPs: 70055.7
+
+Passed
+length = 1536, nheads =  96, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {1536, 1536, 128, 128, 96, 12}.
+
+    Runtime: 25.687 ms
+    GFLOPs: 68034.8
+
+Passed
+length = 2048, nheads =  16, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 64, 64, 16, 12}.
+
+    Runtime: 3.17102 ms
+    GFLOPs: 82028.3
+
+Passed
+length = 2048, nheads =  32, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 64, 64, 32, 12}.
+
+    Runtime: 6.56732 ms
+    GFLOPs: 79214.5
+
+Passed
+length = 2048, nheads =  32, head_size = 80, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 80, 80, 32, 12}.
+
+    Runtime: 12.5356 ms
+    GFLOPs: 51778.6
+
+Passed
+length = 2048, nheads =  32, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 128, 128, 32, 12}.
+
+    Runtime: 14.2153 ms
+    GFLOPs: 72852.6
+
+Passed
+length = 2048, nheads =  40, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 128, 128, 40, 12}.
+
+    Runtime: 18.4883 ms
+    GFLOPs: 70018.7
+
+Passed
+length = 2048, nheads =  56, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 128, 128, 56, 12}.
+
+    Runtime: 26.1055 ms
+    GFLOPs: 69423.7
+
+Passed
+length = 2048, nheads =  72, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 128, 128, 72, 12}.
+
+    Runtime: 33.1248 ms
+    GFLOPs: 70344.6
+
+Passed
+length = 2048, nheads =  96, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {2048, 2048, 128, 128, 96, 12}.
+
+    Runtime: 45.0376 ms
+    GFLOPs: 68983.9
+
+Passed
+length = 3072, nheads =  16, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 64, 64, 16, 12}.
+
+    Runtime: 7.47832 ms
+    GFLOPs: 78260.3
+
+Passed
+length = 3072, nheads =  32, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 64, 64, 32, 12}.
+
+    Runtime: 15.1228 ms
+    GFLOPs: 77400.5
+
+Passed
+length = 3072, nheads =  32, head_size = 80, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 80, 80, 32, 12}.
+
+    Runtime: 28.2343 ms
+    GFLOPs: 51725
+
+Passed
+length = 3072, nheads =  32, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 128, 128, 32, 12}.
+
+    Runtime: 31.9871 ms
+    GFLOPs: 72846.6
+
+Passed
+length = 3072, nheads =  40, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 128, 128, 40, 12}.
+
+    Runtime: 41.8281 ms
+    GFLOPs: 69634.8
+
+Passed
+length = 3072, nheads =  56, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 128, 128, 56, 12}.
+
+    Runtime: 57.3156 ms
+    GFLOPs: 71145.9
+
+Passed
+length = 3072, nheads =  72, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 128, 128, 72, 12}.
+
+    Runtime: 73.7557 ms
+    GFLOPs: 71083.9
+
+Passed
+length = 3072, nheads =  96, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {3072, 3072, 128, 128, 96, 12}.
+
+    Runtime: 98.232 ms
+    GFLOPs: 71162.8
+
+Passed
+length = 4096, nheads =  16, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {4096, 4096, 64, 64, 16, 12}.
+
+    Runtime: 13.3732 ms
+    GFLOPs: 77801.6
+
+Passed
+length = 4096, nheads =  32, head_size = 64, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {4096, 4096, 64, 64, 32, 12}.
+
+    Runtime: 26.8941 ms
+    GFLOPs: 77374.1
+
+Passed
+length = 4096, nheads =  32, head_size = 80, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {4096, 4096, 80, 80, 32, 12}.
+
+    Runtime: 49.9699 ms
+    GFLOPs: 51957.4
+
+Passed
+length = 4096, nheads =  32, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {4096, 4096, 128, 128, 32, 12}.
+
+    Runtime: 57.1778 ms
+    GFLOPs: 72449.3
+
+Passed
+length = 4096, nheads =  40, head_size = 128, batch = 12
+
+CUTLASS Attention:
+====================================================
+     {seq length Q, seq length KV, head size, head size V, head number, batch size} = {4096, 4096, 128, 128, 40, 12}.
+
+    Runtime: 73.2764 ms
+    GFLOPs: 70665.5

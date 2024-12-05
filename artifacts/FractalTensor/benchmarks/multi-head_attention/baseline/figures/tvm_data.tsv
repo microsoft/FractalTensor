@@ -1,0 +1,22 @@
+model name	query len	total time(ms)
+pt_model_time	128	4.796
+onnx_model_time	128	14.274
+onnx_model_runtime	128	247.236
+pt_model_time	256	14.875
+onnx_model_time	256	35.040
+onnx_model_runtime	256	514.620
+pt_model_time	384	34.060
+onnx_model_time	384	63.518
+onnx_model_runtime	384	776.247
+pt_model_time	512	51.911
+onnx_model_time	512	93.142
+onnx_model_runtime	512	1104.498
+pt_model_time	640	98.558
+onnx_model_time	640	148.598
+onnx_model_runtime	640	1401.410
+pt_model_time	768	152.341
+onnx_model_time	768	212.699
+onnx_model_runtime	768	1692.065
+pt_model_time	896	212.152
+onnx_model_time	896	282.281
+onnx_model_runtime	896	1996.061

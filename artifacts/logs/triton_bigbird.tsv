@@ -1,0 +1,2 @@
+block_size	64	seq_length	4096, batch_size	32	hidden_size	512	Triton(ms)	13.102080345153809
+block_size	64	seq_length	8192, batch_size	32	hidden_size	512	Triton(ms)	29.58233642578125

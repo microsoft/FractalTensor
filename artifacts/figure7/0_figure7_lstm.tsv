@@ -1,0 +1,5 @@
+Experiment Name	hidden 256	hidden 512	hidden 1024
+ft(ms)	4.9121	7.3897	11.9670
+cudnn(ms)	15.1269	20.2912	48.5788
+pt(ms)	124.1794	141.5422	230.5971
+triton(ms)	113.3490	117.4579	180.9832

@@ -1,0 +1,4 @@
+Experiment Name	hidden 256	hidden 512	hidden 1024
+ft grid(ms)	45.856	99.051	281.984
+pt(ms)	594.8062	635.5695	701.1381
+triton(ms)	459.2718	464.0467	463.1398

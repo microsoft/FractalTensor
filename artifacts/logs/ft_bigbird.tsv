@@ -1,0 +1,3 @@
+batch size	 sequence length	hidden	block size	elapsed time(ms)
+32	4096	512	64	4.21246
+32	8192	512	64	6.66872
