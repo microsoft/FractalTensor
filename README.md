@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="assets/FractalTensor-logo.png" width="120"/>
+</div>
+
+
 # Program Neural Network with FractalTensor
 
 FractalTensor is a programming framework that introduces a novel approach to organizing data in deep neural networks (DNNs) as a list of lists of statically-shaped tensors, referred to as a FractalTensor. It supports advanced functional list operations, including array compute operators inherited from second-order array combinators (SOACs) such as map, reduce, and scan, as well as first-order array access operators. These high-level operators can be applied to process the nested structure of FractalTensor variables, explicitly revealing opportunities for exploiting nested data parallelism and access locality through automatic compiler analysis.
