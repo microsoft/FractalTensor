@@ -3,17 +3,16 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import context
+from typing import NamedTuple, Tuple
 
-from typing import Tuple, NamedTuple
+import context
+from grid_rnn_utils import *
 
 import kaleido
-from kaleido import Tensor, FractalTensor, StaticList, Iterative
+from kaleido import FractalTensor, Iterative, StaticList, Tensor
 from kaleido import operations as ops
-from kaleido.parser.tests.utils import print_ast
 from kaleido.parser.plot import PlotProgram
-
-from grid_rnn_utils import *
+from kaleido.parser.tests.utils import print_ast
 
 ctx = kaleido.Context()
 
@@ -40,23 +39,25 @@ class ModelParams(NamedTuple):
 
 
 # @kaleido.function(ctx)
-def vanilla_cell(state: Tensor['1, 128', float, 'cpu'],
-                 cur: Tensor['1, 256', float, 'cpu'],
-                 i2h: Tensor['256, 128', float, 'cpu'],
-                 h2h: Tensor['128, 128', float, 'cpu'],
-                 bias: Tensor['1, 128', float, 'cpu']
-                 ) -> Tensor['1, 128', float, 'cpu']:
+def vanilla_cell(
+        state: Tensor['1, 128', float, 'cpu'], cur: Tensor['1, 256', float,
+                                                           'cpu'],
+        i2h: Tensor['256, 128', float, 'cpu'], h2h: Tensor['128, 128', float,
+                                                           'cpu'],
+        bias: Tensor['1, 128', float,
+                     'cpu']) -> Tensor['1, 128', float, 'cpu']:
     h = ops.tanh(cur @ i2h + state @ h2h + bias)
     return h
 
 
 # @kaleido.function(ctx)
 def grid_cell(
-        state: Tuple[Tensor['1, 128', float, 'cpu'], Tensor['1, 128', float,
-                                                            'cpu']],
-        cur_input: Tuple[Tensor['1, 128', float, 'cpu'], Tuple[Tensor[
-            '1, 128', float, 'cpu'], Tensor['1, 128', float, 'cpu']]],
-        block_params: BlockParams
+    state: Tuple[Tensor['1, 128', float, 'cpu'], Tensor['1, 128', float,
+                                                        'cpu']],
+    cur_input: Tuple[Tensor['1, 128', float, 'cpu'],
+                     Tuple[Tensor['1, 128', float, 'cpu'],
+                           Tensor['1, 128', float,
+                                  'cpu']]], block_params: BlockParams
 ) -> Tuple[Tensor['1, 128', float, 'cpu'], Tensor['1, 128', float, 'cpu']]:
     _, state_y = state  # evaluations from the last execution instance.
     # unpack tuple elements, inputs to the current execution instance.
@@ -73,45 +74,44 @@ def grid_cell(
 
 # @kaleido.function(ctx)
 def direction_y(
-        state: Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']],
-                     FractalTensor[Tensor['1, 128', float, 'cpu']]],
-        cur_input: Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']],
-                         FractalTensor[Tensor['1, 128', float, 'cpu']]],
-        block_params: BlockParams
+    state: Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']],
+                 FractalTensor[Tensor['1, 128', float, 'cpu']]],
+    cur_input: Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']],
+                     FractalTensor[Tensor['1, 128', float,
+                                          'cpu']]], block_params: BlockParams
 ) -> Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']], FractalTensor[Tensor[
         '1, 128', float, 'cpu']]]:
     state_xs, _ = state
 
     zero = ops.zeros(shape=(1, 128), device='cpu')
-    ys = ops.scan(
-        lambda s, x: grid_cell(s, x, block_params),
-        ops.zip(state_xs, ops.zip(*cur_input)),
-        initializer=(zero, zero))
+    ys = ops.scan(lambda s, x: grid_cell(s, x, block_params),
+                  ops.zip(state_xs, ops.zip(*cur_input)),
+                  initializer=(zero, zero))
     return ys
 
 
 # @kaleido.function(ctx)
-def direction_x(state: Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']],
-                             FractalTensor[Tensor['1, 128', float, 'cpu']]],
-                block_params: BlockParams
-                ) -> Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']],
-                           FractalTensor[Tensor['1, 128', float, 'cpu']]]:
+def direction_x(
+    state: Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']],
+                 FractalTensor[Tensor['1, 128', float,
+                                      'cpu']]], block_params: BlockParams
+) -> Tuple[FractalTensor[Tensor['1, 128', float, 'cpu']], FractalTensor[Tensor[
+        '1, 128', float, 'cpu']]]:
     # len(state[0][0]) is the length of source language sequence
-    zeros = ops.repeat(
-        ops.zeros(shape=(1, 128), device='cpu'), len(state[0][0]))
-    ys1, ys2 = ops.scan(
-        lambda s, x: direction_y(s, x, block_params),
-        state,
-        initializer=(zeros, zeros))
+    zeros = ops.repeat(ops.zeros(shape=(1, 128), device='cpu'),
+                       len(state[0][0]))
+    ys1, ys2 = ops.scan(lambda s, x: direction_y(s, x, block_params),
+                        state,
+                        initializer=(zeros, zeros))
     ys = ops.zip(ys1, ys2)
     return ys
 
 
 # @kaleido.function(ctx)
 def stacked_grid_rnns(
-        src_encs: FractalTensor[Tensor['1, 128', float, 'cpu']],
-        trg_encs: FractalTensor[Tensor['1, 128', float, 'cpu']],
-        stacked_params: StaticList[BlockParams, '3']
+    src_encs: FractalTensor[Tensor['1, 128', float, 'cpu']],
+    trg_encs: FractalTensor[Tensor['1, 128', float, 'cpu']],
+    stacked_params: StaticList[BlockParams, '3']
 ) -> Tuple[FractalTensor[FractalTensor[Tensor['1, 128', float, 'cpu']]],
            FractalTensor[FractalTensor[Tensor['1, 128', float, 'cpu']]]]:
     yss1, yss2 = ops.fold(
@@ -124,17 +124,21 @@ def stacked_grid_rnns(
 
 # @kaleido.function(ctx)
 def model(
-        src_batch: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
-        trg_batch: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
-        params: ModelParams) -> Tuple[FractalTensor[FractalTensor[
-            FractalTensor[Tensor['1, 128', float, 'cpu']]]], FractalTensor[
-                FractalTensor[FractalTensor[Tensor['1, 128', float, 'cpu']]]]]:
-    src_encs = ops.map(lambda words:ops.map(lambda word:
-            ops.index(ops.slices(params.src_emb, dim=0), word), words),
-            src_batch)
-    trg_encs = ops.map(lambda words:ops.map(lambda word:
-            ops.index(ops.slices(params.trg_emb, dim=0), word), words),
-            trg_batch)
+    src_batch: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
+    trg_batch: FractalTensor[FractalTensor[Tensor['1,', int,
+                                                  'cpu']]], params: ModelParams
+) -> Tuple[FractalTensor[FractalTensor[FractalTensor[Tensor['1, 128', float,
+                                                            'cpu']]]],
+           FractalTensor[FractalTensor[FractalTensor[Tensor['1, 128', float,
+                                                            'cpu']]]]]:
+    src_encs = ops.map(
+        lambda words: ops.map(
+            lambda word: ops.index(ops.slices(params.src_emb, dim=0), word),
+            words), src_batch)
+    trg_encs = ops.map(
+        lambda words: ops.map(
+            lambda word: ops.index(ops.slices(params.trg_emb, dim=0), word),
+            words), trg_batch)
 
     # data parallelism in a mini-batch
     ysss = ops.map(lambda x: stacked_grid_rnns(*x, params.stacked_params),
@@ -148,12 +152,13 @@ def model(
 
 if __name__ == '__main__':
     stacked_params = Iterative.make_iterative(*[
-        BlockParams(
-            x_direction=CellParams(**create_cell()),
-            y_direction=CellParams(**create_cell())) for _ in range(depth)
+        BlockParams(x_direction=CellParams(**create_cell()),
+                    y_direction=CellParams(**create_cell()))
+        for _ in range(depth)
     ])
 
-    params = ModelParams(
-        src_emb=src_emb, trg_emb=trg_emb, stacked_params=stacked_params)
+    params = ModelParams(src_emb=src_emb,
+                         trg_emb=trg_emb,
+                         stacked_params=stacked_params)
 
     xss, yss = model(src_words, trg_words, params)

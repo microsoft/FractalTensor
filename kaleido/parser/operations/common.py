@@ -3,15 +3,13 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import importlib
+import warnings
 
 import kaleido
 from kaleido.parser.errors import UnknownPrimitiveOps
-import warnings
 
 __all__ = [
     'registers',
@@ -38,8 +36,8 @@ class OpRegister:
 
         key = self._norm_key(key)
         if key in self._dict:
-            warnings.warning(
-                "Key %s already in registry %s." % (key, self._name))
+            warnings.warning("Key %s already in registry %s." %
+                             (key, self._name))
         self._dict[key] = value
 
     def register(self, param):

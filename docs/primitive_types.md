@@ -1,23 +1,16 @@
 <!-- vscode-markdown-toc -->
 
-- [Primitive types in XXX](#primitive-types-in-xxx)
+- [Primitive types](#primitive-types)
   - [Atomic data type](#atomic-data-type)
   - [Homogeneous arrays](#homogeneous-arrays)
     - [Arrays of atomic data types with the static shape](#arrays-of-atomic-data-types-with-the-static-shape)
       - [Multi-dimensional array: `Tensor`](#multi-dimensional-array-tensor)
-      - [One-dimensional array: `Array`](#one-dimensional-array-array)
-    - [Jagged array of Tensor: `FractalTensor`](#jagged-array-of-tensor-FractalTensor)
+    - [Jagged array of Tensor: `FractalTensor`](#jagged-array-of-tensor-fractaltensor)
   - [Type equivalence](#type-equivalence)
 
-<!-- vscode-markdown-toc-config
-    numbering=true
-    autoSave=true
-    /vscode-markdown-toc-config -->
-<!-- /vscode-markdown-toc -->
+# Primitive types
 
-# Primitive types in XXX
-
-XXX does not subsume all the features of a full language. It analyzes programs made up of meta operations on **ONLY** three **atomic data types** that are at the core of numeric computing and two primitive **collection types**.
+FractalTensor does not subsume all the features of a full language. It analyzes programs made up of meta operations on **ONLY** three **atomic data types** that are at the core of numeric computing and two primitive **collection types**.
 
 1. primitive atomic data types:
    - integers(`int`), floats(`float`) and booleans(`bool`)
@@ -33,10 +26,10 @@ Fig 1. gives a logical and geometric view of Tensor and FractalTensor abstractio
 
 <p align="center">
 <img src="images/data_types.png" width=85%><br>
-Fig 1. The geometric view of two core collection types in XXX.
+Fig 1. The geometric view of two core collection types.
 </p>
 
-All types in XXX have parameters and structures expressed as a tree. Type expression receives type parameters and creates the type structure.
+All types in FractalTensor have parameters and structures expressed as a tree. Type expression receives type parameters and creates the type structure.
 
 ## Atomic data type
 
@@ -55,9 +48,9 @@ Fig 2. Type structure created for (a) int32 and (b) float16.
 
 ## Homogeneous arrays
 
-XXX is based on homogeneous collection types: sequences and multi-dimensional arrays as primitive parallel data types. Homogeneous collection types that aggregate multiple elements of the same type form an addressable region of contiguous memory. Operations that iterate over arrays or access array elements derive their performance from the compiler's compile-time program analysis.
+FractalTensor is based on homogeneous collection types: sequences and multi-dimensional arrays as primitive parallel data types. Homogeneous collection types that aggregate multiple elements of the same type form an addressable region of contiguous memory. Operations that iterate over arrays or access array elements derive their performance from the compiler's compile-time program analysis.
 
-XXX particularly presents two kinds of homogenous arrays:
+FractalTensor particularly presents two kinds of homogenous arrays:
 
 1. Fixed-size array of atomic data types called `Tensor`.
    - Tensor is a grid-ordered collection of atomic data types.
@@ -91,28 +84,6 @@ Fig 3. Type structure created for <font size=2>a:Tensor[float32, [11,3,7]]</font
 
 After type creation, the shape of a tensor **CANNOT** be changed during program analysis and the entire execution of the program (information in green font).
 
-#### One-dimensional array: `Array`
-
-`Array` is a specialization of one-dimensional Tensor. `Array` is declared by specifying two type parameters:
-
-1. `dtype`: array element type that can only be one of the atomic data types.
-1. `length`: an integer.
-
-`Array` elements are linearly-ordered by their position in the array.
-
-Example: type creation of `Array`:
-
-```python
-a = Array(dtype=float32, length=7)
-```
-
-<p align="center">
-<img src="images/type_expression_array.png" width="15%"><br>
-Fig 4. Type structure created for <font size=2>a:Array[float32, 7]</font>.
-</p>
-
-After type creation, the length of `Array` **CANNOT** be changed during program analysis and the entire execution of the program (information in green color).
-
 ### Jagged array of Tensor: `FractalTensor`
 
 `FractalTensor` is a jagged linearly-ordered collection of more primitive type `Array` and `Tensor`, or a `FractalTensor`. A greater degree of flexibility of the `FractalTensor` abstraction is from the fact that **it can be nested for an arbitrary depth**.
@@ -138,7 +109,7 @@ c = FractalTensor(dtype=FractalTensor(dtype=Tensor(dtype=float16, shape=(11,3,7)
 
 <p align="center">
 <img src="images/type_expression_FractalTensor.png" width="75%"><br>
-Fig 5. Type structure created for <font size=2>FractalTensor</font> variables.
+Fig 4. Type structure created for <font size=2>FractalTensor</font> variables.
 </p>
 
 The information in green font is static, known at compile-time, and does not change after type creation. The information in red font is data-dependent, not available at compile-time, and may change from mini-batch to mini-batch when training a machine learning model.
@@ -147,7 +118,7 @@ One of the most important motivations of `FractalTensor` is it is a powerful exp
 
 ## Type equivalence
 
-Type is the meta info attached to a variable. In XXX, all types are represented by a tree internally as shown in Fig 2 ~ Fig 5.
+Type is the meta info attached to a variable. In FractalTensor, all types are represented by a tree internally as shown in Fig 2 ~ Fig 4.
 
 Suppose `a` and `b` are two types created by the type constructor. They are structurally equivalent if and only if:
 

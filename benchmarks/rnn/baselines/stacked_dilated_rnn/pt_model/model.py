@@ -5,15 +5,13 @@
 
 import math
 import random
+from typing import List, Tuple
+
 import numpy as np
-
-from typing import List
-from typing import Tuple
-
 import torch
 import torch.jit as jit
-from torch import Tensor
 import torch.nn as nn
+from torch import Tensor
 
 __all__ = [
     'StackedDRNNJIT',
@@ -22,6 +20,7 @@ __all__ = [
 
 
 class StackedDRNNJIT(nn.Module):
+
     def __init__(self,
                  batch_size: int,
                  seq_len: int,
@@ -38,29 +37,26 @@ class StackedDRNNJIT(nn.Module):
         rate = dilation[-1]
         self.register_buffer(
             'padding_data',
-            torch.zeros(
-                (rate - (seq_len % rate)) % rate,
-                batch_size,
-                input_size,
-                device=device,
-                dtype=dtype))
+            torch.zeros((rate - (seq_len % rate)) % rate,
+                        batch_size,
+                        input_size,
+                        device=device,
+                        dtype=dtype))
 
         self.dilation_above_first_layer = dilation[1:]
-        self.cell1 = nn.LSTM(
-            input_size,
-            hidden_size,
-            num_layers=1,
-            batch_first=False,
-            dropout=0.,
-            dtype=dtype)
+        self.cell1 = nn.LSTM(input_size,
+                             hidden_size,
+                             num_layers=1,
+                             batch_first=False,
+                             dropout=0.,
+                             dtype=dtype)
         self.cells = torch.nn.ModuleList([
-            nn.LSTM(
-                input_size,
-                hidden_size,
-                num_layers=1,
-                batch_first=False,
-                dropout=0.,
-                dtype=dtype) for i in range(len(dilation) - 1)
+            nn.LSTM(input_size,
+                    hidden_size,
+                    num_layers=1,
+                    batch_first=False,
+                    dropout=0.,
+                    dtype=dtype) for i in range(len(dilation) - 1)
         ])
 
     def forward(self, input: Tensor) -> Tensor:
@@ -96,6 +92,7 @@ class StackedDRNNJIT(nn.Module):
 
 
 class StackedDRNN(nn.Module):
+
     def __init__(self,
                  batch_size: int,
                  seq_len: int,
@@ -117,8 +114,10 @@ class StackedDRNN(nn.Module):
 
         layers = []
         for i in range(len(dilation)):
-            c = nn.LSTM(
-                self.input_size, self.hidden_size, dropout=0., dtype=dtype)
+            c = nn.LSTM(self.input_size,
+                        self.hidden_size,
+                        dropout=0.,
+                        dtype=dtype)
             layers.append(c)
         self.cells = nn.Sequential(*layers)
 
@@ -127,20 +126,18 @@ class StackedDRNN(nn.Module):
 
         # padding
         pad_num = (rate - (self.seq_len % rate)) % rate
-        padding_data = torch.zeros(
-            pad_num,
-            self.batch_size,
-            input_size,
-            device=self.device,
-            dtype=self.dtype)
+        padding_data = torch.zeros(pad_num,
+                                   self.batch_size,
+                                   input_size,
+                                   device=self.device,
+                                   dtype=self.dtype)
 
         input_x = torch.cat((input_x, padding_data))
 
-        dilated_input = torch.stack(
-            tuple(
-                map(lambda m: m.flatten(start_dim=0, end_dim=1),
-                    input_x.split(rate))),
-            dim=0)
+        dilated_input = torch.stack(tuple(
+            map(lambda m: m.flatten(start_dim=0, end_dim=1),
+                input_x.split(rate))),
+                                    dim=0)
 
         output, _ = cell(dilated_input)
 

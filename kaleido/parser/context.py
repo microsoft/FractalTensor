@@ -3,25 +3,17 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from typing import Dict
-from typing import List
-from typing import Tuple
-from typing import Deque
-from typing import NamedTuple
-from collections.abc import Sequence
-from collections import OrderedDict
-from collections import deque
 import warnings
-from enum import Enum
-from enum import unique
+from collections import OrderedDict, deque
+from collections.abc import Sequence
+from enum import Enum, unique
+from typing import Deque, Dict, List, NamedTuple, Tuple
+
 import kaleido
 from kaleido.frontend.types import Storage
-from kaleido.parser.ir_nodes import NodeBase
-from kaleido.parser.ir_nodes import BlockNode
+from kaleido.parser.ir_nodes import BlockNode, NodeBase
 
 __all__ = [
     'Context',
@@ -56,6 +48,7 @@ class NameRecord(NamedTuple):
 
 
 class SymbolTable(object):
+
     def __init__(self):
         self._symbols = OrderedDict()
 
@@ -223,12 +216,11 @@ class Context(Sequence):
         self.name_count += 1
         gen_name = '%{}'.format(self.name_count)
 
-        record = NameRecord(
-            gen_name=gen_name,
-            node=node,
-            block=local_scope.name,
-            level=local_scope.depth,
-            var_type=var_type)
+        record = NameRecord(gen_name=gen_name,
+                            node=node,
+                            block=local_scope.name,
+                            level=local_scope.depth,
+                            var_type=var_type)
         if name:
             if node is None:
                 warnings.warn(

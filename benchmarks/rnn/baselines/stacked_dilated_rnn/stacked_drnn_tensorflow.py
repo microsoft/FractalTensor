@@ -4,18 +4,20 @@
 # --------------------------------------------------------------------------
 
 import os
+
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 import math
 import unittest
 from time import time
-import tensorflow as tf
 
+import tensorflow as tf
 from tf_model import StackedDRNN
 from utils import *
 
 
 class TFGraphDRNN(unittest.TestCase):
+
     def setUp(self):
         self.shape = (SEQ_LEN, BATCH_SIZE, INPUT_SIZE)
         self.stddev = 1.0 / math.sqrt(HIDDEN_SIZE)
@@ -43,12 +45,11 @@ class TFGraphDRNN(unittest.TestCase):
                 '/device:GPU:0',
         ]:
             with tf.device(device):
-                model = StackedDRNN(
-                    batch_size=BATCH_SIZE,
-                    seq_len=SEQ_LEN,
-                    input_size=INPUT_SIZE,
-                    hidden_size=HIDDEN_SIZE,
-                    dilation=DILATION)
+                model = StackedDRNN(batch_size=BATCH_SIZE,
+                                    seq_len=SEQ_LEN,
+                                    input_size=INPUT_SIZE,
+                                    hidden_size=HIDDEN_SIZE,
+                                    dilation=DILATION)
 
                 x = tf.random.uniform(shape, minval=-stddev, maxval=stddev)
                 rate = DILATION[-1]

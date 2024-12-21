@@ -3,20 +3,15 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import Tuple
-
 import random
+from typing import NamedTuple, Tuple
+
 import torch
 
-from typing import NamedTuple
-
 import kaleido
-from kaleido import Tensor, FractalTensor
-from kaleido import TensorStorage, FractalTensorStorage
+from examples.utils import gen_dataset, gen_dataset_time_major
+from kaleido import FractalTensor, FractalTensorStorage, Tensor, TensorStorage
 from kaleido import operations as ops
-
-from examples.utils import gen_dataset
-from examples.utils import gen_dataset_time_major
 
 # ============= hyper parameters
 batch_size = 7
@@ -42,14 +37,17 @@ def create_stacked_params(shape, depth):
 
 
 def create_params():
-    embedding = Tensor(
-        (vocab_size, hidden_dim), kaleido.float32, device=device)
+    embedding = Tensor((vocab_size, hidden_dim),
+                       kaleido.float32,
+                       device=device)
     embedding.initialize(torch.rand, *embedding.shape, device=device)
 
-    prev_softmax_proj = Tensor(
-        (hidden_dim, vocab_size), kaleido.float32, device=device)
-    prev_softmax_proj.initialize(
-        torch.rand, *prev_softmax_proj.shape, device=device)
+    prev_softmax_proj = Tensor((hidden_dim, vocab_size),
+                               kaleido.float32,
+                               device=device)
+    prev_softmax_proj.initialize(torch.rand,
+                                 *prev_softmax_proj.shape,
+                                 device=device)
 
     Wss = create_stacked_params([hidden_dim, hidden_dim], depth)
     Uss = create_stacked_params([hidden_dim, hidden_dim], depth)
@@ -80,11 +78,13 @@ class ModelParams(NamedTuple):
 params = ModelParams(**create_params())
 
 batch_words = gen_dataset(batch_size, vocab_size, device=device)
-batched_embs = ops.map(lambda words: ops.map(lambda word:
-        ops.index(ops.slices(params.embedding, dim=0), word), words),
-        batch_words)
+batched_embs = ops.map(
+    lambda words: ops.map(
+        lambda word: ops.index(ops.slices(params.embedding, dim=0), word),
+        words), batch_words)
 
 words = gen_dataset_time_major(batch_size, vocab_size, device=device)
-embs = ops.map(lambda ws: ops.map(lambda word:
-            ops.index(ops.slices(params.embedding, dim=0), word), ws),
-       words)
+embs = ops.map(
+    lambda ws: ops.map(
+        lambda word: ops.index(ops.slices(params.embedding, dim=0), word), ws),
+    words)

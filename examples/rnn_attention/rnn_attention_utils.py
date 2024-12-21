@@ -3,12 +3,11 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import kaleido
-from kaleido import Tensor
-
 import torch
 
+import kaleido
 from examples.utils import gen_dataset
+from kaleido import Tensor
 
 # ============= hyper parameters
 device = 'cpu'

@@ -3,25 +3,20 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import logging
-import sys
-import warnings
-
-import torch
-import numpy as np
-import time
-import math
 import argparse
-
+import logging
+import math
+import sys
+import time
+import warnings
 from pathlib import Path
+
+import numpy as np
+import torch
 import tvm
-from tvm import te
-from tvm import testing
-from tvm import autotvm
-from tvm.target import Target
-from tvm import auto_scheduler
-from tvm import topi
+from tvm import auto_scheduler, autotvm, te, testing, topi
 from tvm.autotvm.tuner import XGBTuner
+from tvm.target import Target
 
 
 def tvm_solver(parameter,
@@ -29,6 +24,7 @@ def tvm_solver(parameter,
                dtype,
                use_logFile,
                logFile="backToBackGemm.json"):
+
     @auto_scheduler.register_workload
     def backToBackGemm_kernel(M, K, N, P, dtype):
         A = te.placeholder((M, K), name="A", dtype=dtype)
@@ -55,10 +51,9 @@ def tvm_solver(parameter,
     logFile = f"backToBackGemm_{M}_{K}_{N}_{P}.json"
 
     tasks = [
-        tvm.auto_scheduler.SearchTask(
-            func=backToBackGemm_kernel,
-            args=(M, K, N, P, dtype),
-            target=target),
+        tvm.auto_scheduler.SearchTask(func=backToBackGemm_kernel,
+                                      args=(M, K, N, P, dtype),
+                                      target=target),
     ]
 
     tuning_rounds = 1000
@@ -80,10 +75,9 @@ def tvm_solver(parameter,
 
     backToBackGemm_kernel_sch, backToBackGemm_kernel_args = tasks[
         0].apply_best(logFile)
-    backToBackGemm_mod = tvm.lower(
-        backToBackGemm_kernel_sch,
-        backToBackGemm_kernel_args,
-        simple_mode=True)
+    backToBackGemm_mod = tvm.lower(backToBackGemm_kernel_sch,
+                                   backToBackGemm_kernel_args,
+                                   simple_mode=True)
     backToBackGemm = tvm.build(backToBackGemm_kernel_sch,
                                backToBackGemm_kernel_sch, target)
 
@@ -149,8 +143,10 @@ def run_test(test_case):
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='BacktoBack GEMMs')
-    parser.add_argument(
-        '--output_file', type=str, help='Output file path', default=None)
+    parser.add_argument('--output_file',
+                        type=str,
+                        help='Output file path',
+                        default=None)
     return parser.parse_args()
 
 

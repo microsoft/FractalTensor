@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------
 
 from typing import List
+
 import tensorflow as tf
 
 __all__ = [
@@ -12,6 +13,7 @@ __all__ = [
 
 
 class StackedDRNN(tf.keras.Model):
+
     def __init__(self, batch_size: int, seq_len: int, input_size: int,
                  hidden_size: int, dilation: List[int]):
         super(StackedDRNN, self).__init__()
@@ -29,8 +31,8 @@ class StackedDRNN(tf.keras.Model):
         self.cells = []
         for i in range(self.num_layers):
             self.cells.append(
-                tf.compat.v1.keras.layers.CuDNNLSTM(
-                    hidden_size, return_sequences=False))
+                tf.compat.v1.keras.layers.CuDNNLSTM(hidden_size,
+                                                    return_sequences=False))
 
     # uncomment the following line to enable auto-graph.
     # @tf.function

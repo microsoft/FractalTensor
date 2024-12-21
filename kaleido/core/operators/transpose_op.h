@@ -8,9 +8,9 @@ namespace ops {
 
 template <typename DeviceContext, typename Place, typename T>
 class TransposeOp {
-   public:
-    void operator()(const Tensor& input, Tensor& output,
-                    std::vector<size_t> dims);
+public:
+  void operator()(const Tensor& input, Tensor& output,
+                  std::vector<size_t> dims);
 };
 
 }  // namespace ops

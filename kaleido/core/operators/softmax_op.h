@@ -8,9 +8,9 @@ namespace ops {
 
 template <typename DeviceContext, typename Place, typename T>
 class SoftmaxOp {
-   public:
-    void operator()(const DeviceContext& context, const Tensor& x, Tensor& y,
-                    int dim);
+public:
+  void operator()(const DeviceContext& context, const Tensor& x, Tensor& y,
+                  int dim);
 };
 
 }  // namespace ops

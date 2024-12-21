@@ -3,20 +3,18 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import time
-import sys
-import math
-import unittest
-import os
-import logging
-import datetime
 import argparse
+import datetime
+import logging
+import math
+import os
+import sys
+import time
+import unittest
 
-import test_utils as tu
 import tensorflow as tf
-from tf_model.rnn import StaticRNN
-from tf_model.rnn import FineGrainedOpLstmNet
-from tf_model.rnn import WhileOpLstmNet
+import test_utils as tu
+from tf_model.rnn import FineGrainedOpLstmNet, StaticRNN, WhileOpLstmNet
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Only print error information.
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -35,20 +33,27 @@ def str2bool(v):
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='Girdlstm')
-    parser.add_argument(
-        '--seq_len', type=int, help='Sequence length', default=32)
-    parser.add_argument(
-        '--batch_size', type=int, help='Batch size', default=256)
-    parser.add_argument(
-        '--hidden_size', type=int, help='Hidden size', default=256)
+    parser.add_argument('--seq_len',
+                        type=int,
+                        help='Sequence length',
+                        default=32)
+    parser.add_argument('--batch_size',
+                        type=int,
+                        help='Batch size',
+                        default=256)
+    parser.add_argument('--hidden_size',
+                        type=int,
+                        help='Hidden size',
+                        default=256)
     parser.add_argument('--depth', type=int, help='Depth size', default=8)
-    parser.add_argument(
-        '--output_file', type=str, help='Output file path', default=None)
-    parser.add_argument(
-        '--default_test',
-        type=str2bool,
-        help='Whether to run the default test',
-        default=False)
+    parser.add_argument('--output_file',
+                        type=str,
+                        help='Output file path',
+                        default=None)
+    parser.add_argument('--default_test',
+                        type=str2bool,
+                        help='Whether to run the default test',
+                        default=False)
     return parser.parse_args()
 
 
@@ -105,8 +110,9 @@ class TFGraphStackedLSTM(unittest.TestCase):
         '''
         shape = (test_case[0], test_case[1], test_case[2])
         with tf.device(tu.device(dev)):
-            data = tf.random.uniform(
-                shape, minval=-self.stddev, maxval=self.stddev)
+            data = tf.random.uniform(shape,
+                                     minval=-self.stddev,
+                                     maxval=self.stddev)
             output = model(data)
 
             with tf.compat.v1.Session() as sess:
@@ -168,10 +174,9 @@ class TFGraphStackedLSTM(unittest.TestCase):
                     # 'cpu',
                     'gpu',
             ]:
-                model = StaticRNN(
-                    hidden_size=TFGraphStackedLSTM.HIDDEN,
-                    num_layers=TFGraphStackedLSTM.NUM_LAYERS,
-                    use_cudnn_rnn=False)
+                model = StaticRNN(hidden_size=TFGraphStackedLSTM.HIDDEN,
+                                  num_layers=TFGraphStackedLSTM.NUM_LAYERS,
+                                  use_cudnn_rnn=False)
                 test_case = (self.SEQ_LEN, self.BATCH_SIZE, self.HIDDEN,
                              self.NUM_LAYERS)
                 self._apply_forward(test_case, device,
@@ -195,8 +200,9 @@ class TFGraphStackedLSTM(unittest.TestCase):
 
             def build_model2(test_case):
                 seq_len, batch_size, hidden, num_layers = test_case
-                GraphModeModel = StaticRNN(
-                    hidden, num_layers, use_cudnn_rnn=False)
+                GraphModeModel = StaticRNN(hidden,
+                                           num_layers,
+                                           use_cudnn_rnn=False)
                 return GraphModeModel
 
             test_cases = [

@@ -3,18 +3,16 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
+from typing import NamedTuple, Tuple
+
 import context
-from typing import Tuple
-from typing import NamedTuple
-
 import torch
-import kaleido
-from kaleido import StaticList
-from kaleido import Iterative
-from kaleido import operations as ops
-
-from examples.utils import gen_equal_length_seqs
 from transformer_utils import *
+
+import kaleido
+from examples.utils import gen_equal_length_seqs
+from kaleido import Iterative, StaticList
+from kaleido import operations as ops
 
 ctx = kaleido.Context()
 
@@ -48,10 +46,12 @@ def Gelu(x: Tensor['1, 16', float, 'cpu']) -> Tensor['1, 16', float, 'cpu']:
 
 
 # @kaleido.function(ctx)
-def single_heads_attn(qs: FractalTensor[Tensor['1, 8', float, 'cpu']],
-                      ks: FractalTensor[Tensor['1, 8', float, 'cpu']],
-                      vs: FractalTensor[Tensor['1, 8', float, 'cpu']]
-                      ) -> FractalTensor[Tensor['1, 8', float, 'cpu']]:
+def single_heads_attn(
+    qs: FractalTensor[Tensor['1, 8', float, 'cpu']],
+    ks: FractalTensor[Tensor['1, 8', float,
+                             'cpu']], vs: FractalTensor[Tensor['1, 8', float,
+                                                               'cpu']]
+) -> FractalTensor[Tensor['1, 8', float, 'cpu']]:
     # attention for a single head.
     unnorm_score = ops.map(lambda q: ops.map(lambda k: ops.dot(k, q) / 8., ks),
                            qs)
@@ -68,7 +68,7 @@ def single_heads_attn(qs: FractalTensor[Tensor['1, 8', float, 'cpu']],
 
 # @kaleido.function(ctx)
 def change_layout(
-        xss: FractalTensor[FractalTensor[Tensor['1, 8', float, 'cpu']]]
+    xss: FractalTensor[FractalTensor[Tensor['1, 8', float, 'cpu']]]
 ) -> FractalTensor[Tensor['1, 64', float, 'cpu']]:
     v = ops.flatten(xss)
     v = ops.reshape(v, [n_heads, -1, head_dim])
@@ -90,14 +90,15 @@ def ffn(x: Tensor['1, 64', float, 'cpu'],
 
 # @kaleido.function(ctx)
 def encoder_block(
-        emb: FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]],
-        pos_enc: FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]],
-        block_param: BlockParams
+    emb: FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]],
+    pos_enc: FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]],
+    block_param: BlockParams
 ) -> Tuple[FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]],
            FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]]]:
-    pre_attn_projs = ops.map(lambda params: ops.map(
-            lambda xs: ops.map(lambda p: ops.map(
-            lambda x: x @ p, xs), params), emb), block_param.qkv_projs)
+    pre_attn_projs = ops.map(
+        lambda params: ops.map(
+            lambda xs: ops.map(lambda p: ops.map(lambda x: x @ p, xs), params),
+            emb), block_param.qkv_projs)
 
     # scaled dot product attention.
     encodings = ops.map(
@@ -113,9 +114,12 @@ def encoder_block(
         ops.zip(encodings, pos_enc))
 
     # layer norm
-    normed_encoding = ops.map(lambda xs: ops.map(lambda x:
-        ops.layer_norm(x, w=block_param.layer_norm_scale,
-            b=block_param.layer_norm_bias), xs), encodings)
+    normed_encoding = ops.map(
+        lambda xs: ops.map(
+            lambda x: ops.layer_norm(x,
+                                     w=block_param.layer_norm_scale,
+                                     b=block_param.layer_norm_bias), xs),
+        encodings)
 
     v = ops.map(lambda xs: ops.map(lambda x: ffn(x, block_param), xs),
                 normed_encoding)
@@ -125,8 +129,9 @@ def encoder_block(
 # @kaleido.function(ctx)
 # TODO(ying): arguments of this function should be processed into
 # literal constants
-def sinusoidal_embeddings(seq_len: int, dim: int, batch_size: int, device: str
-                          ) -> FractalTensor[Tensor['1, 64', float, 'cpu']]:
+def sinusoidal_embeddings(
+        seq_len: int, dim: int, batch_size: int,
+        device: str) -> FractalTensor[Tensor['1, 64', float, 'cpu']]:
     inv_freq = 1. / (10000**(
         ops.arange(0, dim, 2, dtype=kaleido.float32, device=device) / dim))
     t = ops.arange(seq_len, dtype=kaleido.float32, device=device)
@@ -145,15 +150,17 @@ def sinusoidal_embeddings(seq_len: int, dim: int, batch_size: int, device: str
 # NOTE: use hash mark # to write comments. Do not use multiline strings
 # inside a set of triple quotes. Paser does not handle the latter.
 # @kaleido.function(ctx)
-def model(seq_batch: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
-          params: ModelParams
-          ) -> FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]]:
+def model(
+    seq_batch: FractalTensor[FractalTensor[Tensor['1,', int,
+                                                  'cpu']]], params: ModelParams
+) -> FractalTensor[FractalTensor[Tensor['1, 64', float, 'cpu']]]:
 
     # This implementation does not pad variable length sequences
     # into a same length.
-    embs = ops.map(lambda words: ops.map(lambda word:
-            ops.index(ops.slices(params.embedding, dim=0), word), words),
-            seq_batch)
+    embs = ops.map(
+        lambda words: ops.map(
+            lambda word: ops.index(ops.slices(params.embedding, dim=0), word),
+            words), seq_batch)
 
     # generate positional encodings.
     pos_encs = sinusoidal_embeddings(seq_len, model_dim, batch_size, device)
@@ -162,24 +169,25 @@ def model(seq_batch: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
     embs = ops.map(lambda xs: ops.map(lambda x: ops.add(*x), ops.zip(*xs)),
                    ops.zip(embs, pos_encs))
 
-    yss = ops.fold(
-        lambda state, param: encoder_block(*state, param),
-        params.block_params,
-        initializer=(embs, pos_encs)),
+    yss = ops.fold(lambda state, param: encoder_block(*state, param),
+                   params.block_params,
+                   initializer=(embs, pos_encs)),
 
     return yss
 
 
 if __name__ == '__main__':
-    seq_batch = gen_equal_length_seqs(
-        batch_size, vocab_size, seq_len, device=device)
+    seq_batch = gen_equal_length_seqs(batch_size,
+                                      vocab_size,
+                                      seq_len,
+                                      device=device)
 
     embedding = Tensor((vocab_size, model_dim), kaleido.float32, device=device)
     embedding.initialize(torch.rand, *embedding.shape, device=device)
 
     blocks = [BlockParams(**atten_param()) for _ in range(depth)]
 
-    params = ModelParams(
-        embedding=embedding, block_params=Iterative.make_iterative(*blocks))
+    params = ModelParams(embedding=embedding,
+                         block_params=Iterative.make_iterative(*blocks))
 
     enc_vecs = model(seq_batch, params)

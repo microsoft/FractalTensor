@@ -4,26 +4,28 @@
 # --------------------------------------------------------------------------
 
 import context
+from sparse_attention_utils import *
 
 import kaleido
 from kaleido import operations as ops
 
-from sparse_attention_utils import *
 
-
-def norm(g1: Tensor['32, 32', float, 'cuda'],
-         w1: Tensor['32, 96', float, 'cuda'],
-         g2: Tensor['32, 32', float, 'cuda']
-         ) -> FractalTensor[Tensor['32, 32', float, 'cuda']]:
+def norm(
+    g1: Tensor['32, 32', float,
+               'cuda'], w1: Tensor['32, 96', float,
+                                   'cuda'], g2: Tensor['32, 32', float, 'cuda']
+) -> FractalTensor[Tensor['32, 32', float, 'cuda']]:
     v = ops.softmax(ops.cat((g1, w1, g2), 1), 1)
     v = ops.split(v, 5, 1)
     return v
 
 
-def attn_func(qs: FractalTensor[Tensor['32, 512', float, 'cuda']],
-              ks: FractalTensor[Tensor['32, 512', float, 'cuda']],
-              vs: FractalTensor[Tensor['32, 512', float, 'cuda']]
-              ) -> FractalTensor[Tensor['32, 512', float, 'cuda']]:
+def attn_func(
+    qs: FractalTensor[Tensor['32, 512', float, 'cuda']],
+    ks: FractalTensor[Tensor['32, 512', float,
+                             'cuda']], vs: FractalTensor[Tensor['32, 512',
+                                                                float, 'cuda']]
+) -> FractalTensor[Tensor['32, 512', float, 'cuda']]:
     # windowed attention and global attention
     # NOTE: Multiple heads and random attention are OMITTED for brevity.
     wks, wvs = ops.shifted_slide(ops.zip(ks, vs), window_size=3)
@@ -44,9 +46,9 @@ def attn_func(qs: FractalTensor[Tensor['32, 512', float, 'cuda']],
 
 
 def bigbird(
-        qss: FractalTensor[FractalTensor[Tensor['32, 512', float, 'cuda']]],
-        kss: FractalTensor[FractalTensor[Tensor['32, 512', float, 'cuda']]],
-        vss: FractalTensor[FractalTensor[Tensor['32, 512', float, 'cuda']]]
+    qss: FractalTensor[FractalTensor[Tensor['32, 512', float, 'cuda']]],
+    kss: FractalTensor[FractalTensor[Tensor['32, 512', float, 'cuda']]],
+    vss: FractalTensor[FractalTensor[Tensor['32, 512', float, 'cuda']]]
 ) -> FractalTensor[FractalTensor[Tensor['32, 512', float, 'cuda']]]:
     v = ops.map(lambda xs: attn_func(*xs), ops.zip(qss, kss, vss))
     return v

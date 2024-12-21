@@ -3,19 +3,17 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from collections import namedtuple
-import torch
-from time import time
 import argparse
-import unittest
 import logging
-import sys
 import os
+import sys
+import unittest
+from collections import namedtuple
+from time import time
 
+import torch
 import triton_model as model
-from torch.profiler import profile
-from torch.profiler import record_function
-from torch.profiler import ProfilerActivity
+from torch.profiler import ProfilerActivity, profile, record_function
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
@@ -33,20 +31,27 @@ def str2bool(v):
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='Girdlstm')
-    parser.add_argument(
-        '--seq_len', type=int, help='Sequence length', default=32)
-    parser.add_argument(
-        '--batch_size', type=int, help='Batch size', default=256)
-    parser.add_argument(
-        '--hidden_size', type=int, help='Hidden size', default=256)
+    parser.add_argument('--seq_len',
+                        type=int,
+                        help='Sequence length',
+                        default=32)
+    parser.add_argument('--batch_size',
+                        type=int,
+                        help='Batch size',
+                        default=256)
+    parser.add_argument('--hidden_size',
+                        type=int,
+                        help='Hidden size',
+                        default=256)
     parser.add_argument('--depth', type=int, help='Depth size', default=8)
-    parser.add_argument(
-        '--output_file', type=str, help='Output file path', default=None)
-    parser.add_argument(
-        '--default_test',
-        type=str2bool,
-        help='Whether to run the default test',
-        default=False)
+    parser.add_argument('--output_file',
+                        type=str,
+                        help='Output file path',
+                        default=None)
+    parser.add_argument('--default_test',
+                        type=str2bool,
+                        help='Whether to run the default test',
+                        default=False)
     return parser.parse_args()
 
 
@@ -129,8 +134,8 @@ class TritonStackedLSTM(unittest.TestCase):
                             break
                         output = model(x)
 
-            print(prof.key_averages().table(
-                sort_by='cuda_time_total', row_limit=20))
+            print(prof.key_averages().table(sort_by='cuda_time_total',
+                                            row_limit=20))
             print(
                 prof.key_averages(group_by_input_shape=True).table(
                     sort_by='cuda_time_total', row_limit=20))
@@ -156,13 +161,12 @@ class TritonStackedLSTM(unittest.TestCase):
                     device=device,
                     dtype=TritonStackedLSTM.dtype)
 
-                m = model.StackedLSTM(
-                    batch_size=TritonStackedLSTM.BATCH_SIZE,
-                    max_seq_length=TritonStackedLSTM.SEQ_LEN,
-                    hidden_size=TritonStackedLSTM.HIDDEN,
-                    num_layers=TritonStackedLSTM.NUM_LAYERS,
-                    device=device,
-                    dtype=TritonStackedLSTM.dtype)
+                m = model.StackedLSTM(batch_size=TritonStackedLSTM.BATCH_SIZE,
+                                      max_seq_length=TritonStackedLSTM.SEQ_LEN,
+                                      hidden_size=TritonStackedLSTM.HIDDEN,
+                                      num_layers=TritonStackedLSTM.NUM_LAYERS,
+                                      device=device,
+                                      dtype=TritonStackedLSTM.dtype)
 
                 test_name = f'triton_finegrained_op_{device}'
                 test_case = [
@@ -183,17 +187,15 @@ class TritonStackedLSTM(unittest.TestCase):
 
                 def build_data(test_case):
                     seq_len, batch_size, hidden, num_layers = test_case
-                    x = torch.randn(
-                        (seq_len, batch_size, hidden),
-                        device=device,
-                        dtype=torch.float16)
-                    m = model.StackedLSTM(
-                        batch_size=batch_size,
-                        max_seq_length=seq_len,
-                        hidden_size=hidden,
-                        num_layers=num_layers,
-                        device=device,
-                        dtype=torch.float16)
+                    x = torch.randn((seq_len, batch_size, hidden),
+                                    device=device,
+                                    dtype=torch.float16)
+                    m = model.StackedLSTM(batch_size=batch_size,
+                                          max_seq_length=seq_len,
+                                          hidden_size=hidden,
+                                          num_layers=num_layers,
+                                          device=device,
+                                          dtype=torch.float16)
                     return x, m
 
                 test_cases = [

@@ -5,11 +5,11 @@
 
 from __future__ import print_function
 
-from context import *
-
-import operator
 import itertools
+import operator
+
 import torch
+from context import *
 
 
 class TestScan(unittest.TestCase):

@@ -3,16 +3,13 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import torch
 import typing
 from typing import Tuple
 
-import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido import TensorStorage
+import torch
 
-from kaleido import FractalTensorStorage
+import kaleido
+from kaleido import FractalTensor, FractalTensorStorage, Tensor, TensorStorage
 
 # ============= hyper parameters
 vocab_size = 5000
@@ -55,12 +52,14 @@ def atten_param():
     ])
 
     layer_norm_scale = Tensor((1, model_dim), kaleido.float32, device=device)
-    layer_norm_scale.initialize(
-        torch.rand, *layer_norm_scale.shape, device=device)
+    layer_norm_scale.initialize(torch.rand,
+                                *layer_norm_scale.shape,
+                                device=device)
 
     layer_norm_bias = Tensor((1, model_dim), kaleido.float32, device=device)
-    layer_norm_bias.initialize(
-        torch.rand, *layer_norm_bias.shape, device=device)
+    layer_norm_bias.initialize(torch.rand,
+                               *layer_norm_bias.shape,
+                               device=device)
 
     ff_mat1 = Tensor((model_dim, ff_inner_dim), kaleido.float32, device=device)
     ff_mat1.initialize(torch.rand, *ff_mat1.shape, device=device)
@@ -85,7 +84,8 @@ def atten_param():
     }
 
 
-def create_param(hidden_sizes: Tuple[int], num_heads: int,
+def create_param(hidden_sizes: Tuple[int],
+                 num_heads: int,
                  device: str = 'cpu'):
     xs = FractalTensor(
         TensorStorage(hidden_sizes, kaleido.float32, device=device))

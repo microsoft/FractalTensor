@@ -3,18 +3,19 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 import torch
 from torch import Tensor
 from torch.nn import Module, Parameter
-from torch.nn.init import zeros_
 from torch.nn.init import xavier_normal_ as init
+from torch.nn.init import zeros_
 
 __all__ = ['StackedGridModel']
 
 
 class VanillaRNNCell(Module):
+
     def __init__(self, hidden_size, grid_dim=2):
         """
         Args:
@@ -62,6 +63,7 @@ class VanillaRNNCell(Module):
 
 
 class GridRNNNaive(Module):
+
     def __init__(self, depth: int, src_len: int, trg_len: int, batch_size: int,
                  hidden_size: int, device: str):
         """
@@ -85,14 +87,13 @@ class GridRNNNaive(Module):
         self.cells = torch.nn.ModuleList(
             [VanillaRNNCell(hidden_size).to(device) for _ in range(depth)])
 
-        self.h_output = torch.zeros(
-            self.depth,
-            src_len,
-            trg_len,
-            2,
-            batch_size,
-            self.hidden_size,
-            device=self.device)
+        self.h_output = torch.zeros(self.depth,
+                                    src_len,
+                                    trg_len,
+                                    2,
+                                    batch_size,
+                                    self.hidden_size,
+                                    device=self.device)
 
     def forward(self, src_array_batch: Tensor, trg_array_batch: Tensor):
         """
@@ -122,18 +123,16 @@ class GridRNNNaive(Module):
                         y_t = self.h_output[d - 1][i][j][1]
 
                     if i == 0:
-                        state_x = torch.zeros(
-                            self.batch_size,
-                            self.hidden_size,
-                            device=self.device)
+                        state_x = torch.zeros(self.batch_size,
+                                              self.hidden_size,
+                                              device=self.device)
                     else:
                         state_x = self.h_output[d][i - 1][j][0]
 
                     if j == 0:
-                        state_y = torch.zeros(
-                            self.batch_size,
-                            self.hidden_size,
-                            device=self.device)
+                        state_y = torch.zeros(self.batch_size,
+                                              self.hidden_size,
+                                              device=self.device)
                     else:
                         state_y = self.h_output[d][i][j - 1][0]
 
@@ -150,6 +149,7 @@ class GridRNNNaive(Module):
 
 
 class StackedGridModel(Module):
+
     def __init__(self, depth: int, src_len: int, trg_len: int, batch_size: int,
                  hidden_size: int, device: str, enable_jit: bool):
         """
@@ -174,8 +174,8 @@ class StackedGridModel(Module):
                              self.hidden_size, self.device)).to(self.device)
         else:
             self.m = GridRNNNaive(self.depth, src_len, trg_len, batch_size,
-                                  self.hidden_size, self.device).to(
-                                      self.device)
+                                  self.hidden_size,
+                                  self.device).to(self.device)
 
     def forward(self, source_input, target_input):
         """
@@ -189,7 +189,7 @@ class StackedGridModel(Module):
                 the shape is (depth, src_len, trg_len, grid_dim, batch_size, hidden_size)
         """
 
-        output = self.m(
-            src_array_batch=source_input, trg_array_batch=target_input)
+        output = self.m(src_array_batch=source_input,
+                        trg_array_batch=target_input)
 
         return output

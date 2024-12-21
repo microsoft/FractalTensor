@@ -3,22 +3,21 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import Tuple
-from typing import List
+from time import time
+from typing import List, Tuple
 
-import torch.jit as jit
 import torch
+import torch.jit as jit
 import torch.nn as nn
+from torch import Tensor
 from torch.nn import Parameter
 from torch.nn.init import xavier_normal_ as init
-from torch import Tensor
-
-from time import time
 
 from .op import *
 
 
 class VanillaRNNCell(nn.Module):
+
     def __init__(self,
                  hidden_size: int,
                  batch_size: int,
@@ -31,25 +30,25 @@ class VanillaRNNCell(nn.Module):
         self.size = (hidden_size, batch_size, grid_dim)
         self.W = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
 
         self.U = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size * grid_dim, hidden_size],
-                    device=device,
-                    dtype=dtype)))
+                torch.empty([hidden_size * grid_dim, hidden_size],
+                            device=device,
+                            dtype=dtype)))
 
         self.b = nn.Parameter(
             torch.zeros([hidden_size], device=device, dtype=dtype))
 
     def forward(
-            self,
-            x_t: Tensor,
-            y_t: Tensor,
-            state: Tensor,
-            state_resident: Tensor,
+        self,
+        x_t: Tensor,
+        y_t: Tensor,
+        state: Tensor,
+        state_resident: Tensor,
     ) -> Tuple[Tensor, Tensor]:
 
         h_x, h_y = Vanilla_scan((self.W, self.U), (x_t, y_t), self.b, state,
@@ -60,6 +59,7 @@ class VanillaRNNCell(nn.Module):
 
 
 class StackedGridModel(nn.Module):
+
     def __init__(self,
                  depth: int,
                  src_len: int,
@@ -77,8 +77,13 @@ class StackedGridModel(nn.Module):
         self.device = device
         self.dtype = dtype
 
-        self.h_output = torch.zeros(
-            depth, src_len, trg_len, 2, batch_size, hidden_size, device=device)
+        self.h_output = torch.zeros(depth,
+                                    src_len,
+                                    trg_len,
+                                    2,
+                                    batch_size,
+                                    hidden_size,
+                                    device=device)
 
         self.cells = torch.nn.ModuleList([
             VanillaRNNCell(hidden_size, batch_size, device, 2,
@@ -86,14 +91,12 @@ class StackedGridModel(nn.Module):
         ])
 
     def forward(self, src_array_batch: Tensor, trg_array_batch: Tensor):
-        h_x_resident = torch.empty(
-            [self.batch_size, self.hidden_size],
-            device=self.device,
-            dtype=self.dtype)
-        h_y_resident = torch.empty(
-            [self.batch_size, self.hidden_size],
-            device=self.device,
-            dtype=self.dtype)
+        h_x_resident = torch.empty([self.batch_size, self.hidden_size],
+                                   device=self.device,
+                                   dtype=self.dtype)
+        h_y_resident = torch.empty([self.batch_size, self.hidden_size],
+                                   device=self.device,
+                                   dtype=self.dtype)
         d = 0
         for m in self.cells:
             for i in range(0, self.src_len, 1):
@@ -106,18 +109,16 @@ class StackedGridModel(nn.Module):
                         y_t = self.h_output[d - 1][i][j][1]
 
                     if i == 0:
-                        state_x = torch.zeros(
-                            self.batch_size,
-                            self.hidden_size,
-                            device=self.device)
+                        state_x = torch.zeros(self.batch_size,
+                                              self.hidden_size,
+                                              device=self.device)
                     else:
                         state_x = self.h_output[d][i - 1][j][0]
 
                     if j == 0:
-                        state_y = torch.zeros(
-                            self.batch_size,
-                            self.hidden_size,
-                            device=self.device)
+                        state_y = torch.zeros(self.batch_size,
+                                              self.hidden_size,
+                                              device=self.device)
                     else:
                         state_y = self.h_output[d][i][j - 1][0]
 

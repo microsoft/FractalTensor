@@ -3,23 +3,16 @@
 - [Elements of the frontend program](#elements-of-the-frontend-program)
   - [Types](#types)
   - [Operations on types](#operations-on-types)
-    - [Jagged FractalTensor and FractalTensor operations](#jagged-FractalTensor-and-FractalTensor-operations)
+    - [Jagged FractalTensor and FractalTensor operations](#jagged-fractaltensor-and-fractaltensor-operations)
     - [Tensor and Tensor operations](#tensor-and-tensor-operations)
 - [Internal representation](#internal-representation)
-
-<!-- vscode-markdown-toc-config
-	numbering=true
-	autoSave=true
-	/vscode-markdown-toc-config -->
-<!-- /vscode-markdown-toc -->
 
 # Elements of the frontend program
 
 ## Types
 
-1. [Primitive types in XXX](primitive_types.md)
+1. [Primitive types](primitive_types.md)
 1. [User-defined types built out of primitive types](user_defined_types.md)
-1. [A summary: abstract syntax and the type system](abstract_syntax/README.md)
 
 ## Operations on types
 

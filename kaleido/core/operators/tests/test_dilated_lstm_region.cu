@@ -28,48 +28,48 @@ template <typename Element, typename WarpArrangement, typename CtaTileShape,
 void run_cute_dilated_lstm_region1(const int depth, const int seq_length,
                                    const int batch_size,
                                    const int hidden_size) {
-    // Initialize the CUDA context.
-    cudaStream_t stream;
-    CudaCheck(cudaStreamCreate(&stream));
-    auto allocator = std::make_shared<CudaMemoryPool>();
-    allocator->add_track_stream(stream);
-    CUDAPlace place = CUDAPlace(0);
-    GPUContext context(place);
+  // Initialize the CUDA context.
+  cudaStream_t stream;
+  CudaCheck(cudaStreamCreate(&stream));
+  auto allocator = std::make_shared<CudaMemoryPool>();
+  allocator->add_track_stream(stream);
+  CUDAPlace place = CUDAPlace(0);
+  GPUContext context(place);
 
-    cudaDeviceProp m_dev_prop;
-    int device_idx;
-    cudaError_t result = cudaGetDevice(&device_idx);
-    cudaGetDeviceProperties(&m_dev_prop, device_idx);
+  cudaDeviceProp m_dev_prop;
+  int device_idx;
+  cudaError_t result = cudaGetDevice(&device_idx);
+  cudaGetDeviceProperties(&m_dev_prop, device_idx);
 
-    ops::FillOp<GPUContext, CUDAPlace, Element> fill;
-    ops::PrintOp<GPUContext, CUDAPlace, Element> printer;
+  ops::FillOp<GPUContext, CUDAPlace, Element> fill;
+  ops::PrintOp<GPUContext, CUDAPlace, Element> printer;
 
-    kaleido::core::Tensor ws({depth, hidden_size, 4 * hidden_size}, allocator);
-    kaleido::core::Tensor us({depth, hidden_size, 4 * hidden_size}, allocator);
-    kaleido::core::Tensor xss({seq_length, batch_size, hidden_size}, allocator);
-    kaleido::core::Tensor hsss({depth, seq_length, batch_size, hidden_size},
-                               allocator);
-    kaleido::core::Tensor csss({depth, seq_length, batch_size, hidden_size},
-                               allocator);
-    kaleido::core::Tensor init({batch_size, hidden_size}, allocator);
+  kaleido::core::Tensor ws({depth, hidden_size, 4 * hidden_size}, allocator);
+  kaleido::core::Tensor us({depth, hidden_size, 4 * hidden_size}, allocator);
+  kaleido::core::Tensor xss({seq_length, batch_size, hidden_size}, allocator);
+  kaleido::core::Tensor hsss({depth, seq_length, batch_size, hidden_size},
+                             allocator);
+  kaleido::core::Tensor csss({depth, seq_length, batch_size, hidden_size},
+                             allocator);
+  kaleido::core::Tensor init({batch_size, hidden_size}, allocator);
 
-    fill(xss, 0, 1e-3);
-    fill(ws, 0, 1e-3);
-    fill(us, 0, 1e-3);
+  fill(xss, 0, 1e-3);
+  fill(ws, 0, 1e-3);
+  fill(us, 0, 1e-3);
 
-    fill(init, 0.);
-    fill(hsss, 0.);
-    fill(csss, 0.);
+  fill(init, 0.);
+  fill(hsss, 0.);
+  fill(csss, 0.);
 
-    cuda_kernel::DilatedLstmRegion1<Element, InstructionShape, ValueMnk,
-                                    WarpArrangement, CtaTileShape, WholeShape>(
-        csss.mutable_data<Element>(), hsss.mutable_data<Element>(),
-        xss.data<Element>(), ws.data<Element>(), us.data<Element>(),
-        init.data<Element>(), seq_length);
+  cuda_kernel::DilatedLstmRegion1<Element, InstructionShape, ValueMnk,
+                                  WarpArrangement, CtaTileShape, WholeShape>(
+      csss.mutable_data<Element>(), hsss.mutable_data<Element>(),
+      xss.data<Element>(), ws.data<Element>(), us.data<Element>(),
+      init.data<Element>(), seq_length);
 
-    std::cout << "Pass unittest for [" << 4 * hidden_size << ", "
-              << seq_length * batch_size << ", " << hidden_size << "]"
-              << std::endl;
+  std::cout << "Pass unittest for [" << 4 * hidden_size << ", "
+            << seq_length * batch_size << ", " << hidden_size << "]"
+            << std::endl;
 }
 
 template <typename Element, typename WarpArrangement, typename CtaTileShape,
@@ -78,73 +78,73 @@ template <typename Element, typename WarpArrangement, typename CtaTileShape,
 void run_cute_dilated_lstm_region2(const int depth, const int seq_length,
                                    const int batch_size,
                                    const int hidden_size) {
-    // Initialize the CUDA context.
-    cudaStream_t stream;
-    CudaCheck(cudaStreamCreate(&stream));
-    auto allocator = std::make_shared<CudaMemoryPool>();
-    allocator->add_track_stream(stream);
-    CUDAPlace place = CUDAPlace(0);
-    GPUContext context(place);
+  // Initialize the CUDA context.
+  cudaStream_t stream;
+  CudaCheck(cudaStreamCreate(&stream));
+  auto allocator = std::make_shared<CudaMemoryPool>();
+  allocator->add_track_stream(stream);
+  CUDAPlace place = CUDAPlace(0);
+  GPUContext context(place);
 
-    cudaDeviceProp m_dev_prop;
-    int device_idx;
-    cudaError_t result = cudaGetDevice(&device_idx);
-    cudaGetDeviceProperties(&m_dev_prop, device_idx);
+  cudaDeviceProp m_dev_prop;
+  int device_idx;
+  cudaError_t result = cudaGetDevice(&device_idx);
+  cudaGetDeviceProperties(&m_dev_prop, device_idx);
 
-    ops::FillOp<GPUContext, CUDAPlace, Element> fill;
-    ops::PrintOp<GPUContext, CUDAPlace, Element> printer;
+  ops::FillOp<GPUContext, CUDAPlace, Element> fill;
+  ops::PrintOp<GPUContext, CUDAPlace, Element> printer;
 
-    kaleido::core::Tensor ws({depth, hidden_size, 4 * hidden_size}, allocator);
-    kaleido::core::Tensor us({depth, hidden_size, 4 * hidden_size}, allocator);
-    kaleido::core::Tensor xss({seq_length, batch_size, hidden_size}, allocator);
-    kaleido::core::Tensor hsss({depth, seq_length, batch_size, hidden_size},
-                               allocator);
-    kaleido::core::Tensor csss({depth, seq_length, batch_size, hidden_size},
-                               allocator);
+  kaleido::core::Tensor ws({depth, hidden_size, 4 * hidden_size}, allocator);
+  kaleido::core::Tensor us({depth, hidden_size, 4 * hidden_size}, allocator);
+  kaleido::core::Tensor xss({seq_length, batch_size, hidden_size}, allocator);
+  kaleido::core::Tensor hsss({depth, seq_length, batch_size, hidden_size},
+                             allocator);
+  kaleido::core::Tensor csss({depth, seq_length, batch_size, hidden_size},
+                             allocator);
 
-    // Fill the input tensors with random values.
-    fill(xss, 0, 1e-3);
-    fill(ws, 0, 1e-3);
-    fill(us, 0, 1e-3);
+  // Fill the input tensors with random values.
+  fill(xss, 0, 1e-3);
+  fill(ws, 0, 1e-3);
+  fill(us, 0, 1e-3);
 
-    // Fill the output tensors with zero.
-    fill(hsss, 0.);
-    fill(csss, 0.);
+  // Fill the output tensors with zero.
+  fill(hsss, 0.);
+  fill(csss, 0.);
 
-    cuda_kernel::DilatedLstmRegion2<Element, InstructionShape, ValueMnk,
-                                    WarpArrangement, CtaTileShape>(
-        csss.mutable_data<Element>(), hsss.mutable_data<Element>(),
-        xss.data<Element>(), ws.data<Element>(), us.data<Element>(), depth,
-        seq_length, batch_size, hidden_size);
+  cuda_kernel::DilatedLstmRegion2<Element, InstructionShape, ValueMnk,
+                                  WarpArrangement, CtaTileShape>(
+      csss.mutable_data<Element>(), hsss.mutable_data<Element>(),
+      xss.data<Element>(), ws.data<Element>(), us.data<Element>(), depth,
+      seq_length, batch_size, hidden_size);
 
-    std::cout << "Pass unittest for [" << 4 * hidden_size << ", "
-              << seq_length * batch_size << ", " << hidden_size << "]"
-              << std::endl;
+  std::cout << "Pass unittest for [" << 4 * hidden_size << ", "
+            << seq_length * batch_size << ", " << hidden_size << "]"
+            << std::endl;
 }
 
 TEST(DilatedLstmRegion, test_dilated_lstm_region1) {
-    // Define the problem size.
-    const int depth = 4;
-    const int seq_length = 4;
-    const int batch_size = 8;
-    const int hidden_size = 32;
+  // Define the problem size.
+  const int depth = 4;
+  const int seq_length = 4;
+  const int batch_size = 8;
+  const int hidden_size = 32;
 
-    run_cute_dilated_lstm_region1<
-        cutlass::half_t, TileShape<1, 1, 1>, TileShape<16, 32, 32>,
-        TileShape<4 * hidden_size, seq_length * batch_size, hidden_size>>(
-        depth, seq_length, batch_size, hidden_size);
+  run_cute_dilated_lstm_region1<
+      cutlass::half_t, TileShape<1, 1, 1>, TileShape<16, 32, 32>,
+      TileShape<4 * hidden_size, seq_length * batch_size, hidden_size>>(
+      depth, seq_length, batch_size, hidden_size);
 }
 
 TEST(DilatedLstmRegion, test_dilated_lstm_region2) {
-    // Define the problem size.
-    const int depth = 4;
-    const int seq_length = 4;
-    const int batch_size = 32;
-    const int hidden_size = 32;
+  // Define the problem size.
+  const int depth = 4;
+  const int seq_length = 4;
+  const int batch_size = 32;
+  const int hidden_size = 32;
 
-    run_cute_dilated_lstm_region2<cutlass::half_t, TileShape<1, 1, 1>,
-                                  TileShape<16, 32, 32>>(
-        depth, seq_length, batch_size, hidden_size);
+  run_cute_dilated_lstm_region2<cutlass::half_t, TileShape<1, 1, 1>,
+                                TileShape<16, 32, 32>>(depth, seq_length,
+                                                       batch_size, hidden_size);
 }
 
 }  // namespace core

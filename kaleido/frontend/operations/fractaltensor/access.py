@@ -3,25 +3,17 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from typing import Union
-from typing import Tuple
-from typing import List
-from typing import TypeVar
+import copy
+from typing import List, Tuple, TypeVar, Union
 
 import torch
-import copy
 
 import kaleido
+from kaleido import (FractalTensor, FractalTensorStorage, Iterative, Tensor,
+                     TensorStorage)
 from kaleido.frontend.operations.base import Access
-from kaleido import Tensor
-from kaleido import TensorStorage
-from kaleido import FractalTensor
-from kaleido import FractalTensorStorage
-from kaleido import Iterative
 
 __all__ = [
     'index',
@@ -42,8 +34,10 @@ T2 = TypeVar('T2')
 
 
 class Index(Access):
+
     def __call__(self, a: Union[FractalTensor[T], Iterative[T]],
                  ids: Union[int, Tensor['(1,)', int, 'cpu']]) -> T:
+
         def _to_int(ids):
             if isinstance(ids, int):
                 return ids
@@ -68,6 +62,7 @@ index = Index()
 
 
 class Zip(Access):
+
     def __call__(self, *inputs: Union[FractalTensor, Iterative]) -> Iterative:
         """Make an iterator that aggregates elements from each of the iterables.
 
@@ -187,6 +182,7 @@ zip = Zip()
 
 
 class Enumerate(Access):
+
     def __call__(self, *inputs: FractalTensor) -> Tuple[int, FractalTensor]:
         assert len(inputs) >= 1
         if not isinstance(inputs[0], FractalTensor):
@@ -210,6 +206,7 @@ enumerate = Enumerate()
 
 
 class Product(Access):
+
     def __call__(self, xs: FractalTensor[T1],
                  ys: FractalTensor[T2]) -> FractalTensor:
         """cartesian product of two FractalTensors, equivalent to a nested for-loop.
@@ -251,6 +248,7 @@ product = Product()
 
 
 class Last(Access):
+
     def __call__(self, x: FractalTensor):
         return x[-1]
 
@@ -259,6 +257,7 @@ last = Last()
 
 
 class Join(Access):
+
     def __call__(self, x: FractalTensor, y: FractalTensor):
         assert isinstance(x, FractalTensor) and isinstance(y, FractalTensor)
         assert x._type.is_equal_type(y._type)
@@ -267,8 +266,8 @@ class Join(Access):
         for i in range(x.depth - 1):
             rv_type = FractalTensorStorage(x.element_type)
         joined = FractalTensor(rv_type)
-        joined.indices = (x.indices + y.indices
-                          if x.depth > 1 else list(range(len(x) + len(y))))
+        joined.indices = (x.indices + y.indices if x.depth > 1 else list(
+            range(len(x) + len(y))))
 
         if x.data is not None and y.data is not None:
             # FIXME(ying): hardcoded to use torch tensor operatons.
@@ -280,6 +279,7 @@ join = Join()
 
 
 class SlideBase(Access):
+
     def _preprocess(self, input):
         if isinstance(input, FractalTensor):
             return input
@@ -310,14 +310,16 @@ class SlideBase(Access):
 
 
 class Slide(SlideBase):
-    def _slide_impl(self,
-                    input: FractalTensor[T],
-                    window_size: int,
-                    stride: int,
-                    dilation: int,
-                    padding: int,
-                    padding_value: Union[FractalTensor, Tensor] = None
-                    ) -> FractalTensor[FractalTensor[T]]:
+
+    def _slide_impl(
+        self,
+        input: FractalTensor[T],
+        window_size: int,
+        stride: int,
+        dilation: int,
+        padding: int,
+        padding_value: Union[FractalTensor, Tensor] = None
+    ) -> FractalTensor[FractalTensor[T]]:
         if not (isinstance(padding_value, Tensor)
                 or isinstance(padding_value, FractalTensor)):
             raise TypeError(('Expected Tensor or FractalTensor, '
@@ -383,6 +385,7 @@ slide = Slide()
 
 
 class ShiftedSlide(SlideBase):
+
     def _shift_slide_impl(self, input: FractalTensor[T], window_size: int,
                           dilation: int) -> FractalTensor[FractalTensor[T]]:
         window_span = (window_size - 1) * (dilation - 1) + window_size
@@ -428,6 +431,7 @@ shifted_slide = ShiftedSlide()
 
 
 class Window(Access):
+
     def __call__(self,
                  index: Union[int, Tensor],
                  input: FractalTensor[T],
@@ -455,8 +459,8 @@ class Window(Access):
         half_window = window_span // 2
 
         left_pad = 0 if index - half_window > 0 else half_window - index
-        right_pad = (0 if index + half_window < input.length else
-                     index + half_window - input.length)
+        right_pad = (0 if index + half_window < input.length else index +
+                     half_window - input.length)
 
         padded_inputs = input
         if left_pad > 0:
@@ -489,6 +493,7 @@ window = Window()
 
 
 class ShiftedWindow(Access):
+
     def __call__(self, index: Union[int, Tensor], input: FractalTensor[T],
                  window_size: int, dilation: int) -> FractalTensor[T]:
         """

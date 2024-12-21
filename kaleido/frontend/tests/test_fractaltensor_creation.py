@@ -5,11 +5,12 @@
 
 from __future__ import print_function
 
-from context import *
 import torch
+from context import *
 
 
 class TestTensor(unittest.TestCase):
+
     def test1(self):
         """Test create Tensor from torch's tensor."""
 
@@ -46,6 +47,7 @@ class TestTensor(unittest.TestCase):
 
 
 class TestFractalTensor(unittest.TestCase):
+
     def setUp(self):
         random.seed(12345)
 

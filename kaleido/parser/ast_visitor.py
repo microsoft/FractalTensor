@@ -3,45 +3,29 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-from kaleido.parser.plot import PlotProgram
+from __future__ import absolute_import, division, print_function
 
 import ast
 import copy
-from abc import ABCMeta
-from abc import abstractmethod
-from typing import Union
-from typing import List
-from typing import Dict
-from typing import Tuple
+from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
+from typing import Dict, List, Tuple, Union
+
 from absl import logging
 from astpretty import pprint
 
 import kaleido
-from kaleido.frontend.types import Storage
-from kaleido.frontend.types import StorageInfoTree
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import FractalTensorStorage
-from kaleido.frontend.types import StaticListStorage
-from kaleido.parser.context import ContextFrame
-from kaleido.parser.context import NameRecord
+from kaleido.frontend.types import (FractalTensorStorage, StaticListStorage,
+                                    Storage, StorageInfoTree, TensorStorage)
+from kaleido.parser.context import ContextFrame, NameRecord
+from kaleido.parser.errors import (AnnotationError, ParseError,
+                                   UnknownPrimitiveOps, UnsupportedConstruct,
+                                   UnsupportedType)
+from kaleido.parser.ir_nodes import (Aggregate, ApplyToEach, BlockNode,
+                                     EdgeEnd, NodeBase, OperationNode,
+                                     ParallelNode)
 from kaleido.parser.operations.common import registers
-from kaleido.parser.ir_nodes import NodeBase
-from kaleido.parser.ir_nodes import OperationNode
-from kaleido.parser.ir_nodes import BlockNode
-from kaleido.parser.ir_nodes import ParallelNode
-from kaleido.parser.ir_nodes import ApplyToEach
-from kaleido.parser.ir_nodes import Aggregate
-from kaleido.parser.ir_nodes import EdgeEnd
-from kaleido.parser.errors import AnnotationError
-from kaleido.parser.errors import UnsupportedType
-from kaleido.parser.errors import UnsupportedConstruct
-from kaleido.parser.errors import UnknownPrimitiveOps
-from kaleido.parser.errors import ParseError
+from kaleido.parser.plot import PlotProgram
 
 __all__ = [
     'AstVisitor',
@@ -286,6 +270,7 @@ class AstVisitor(AstVisitorBase):
         return node.value.id
 
     def visit_Slice(self, node):
+
         def _get_number(num):
             if not num:
                 return None
@@ -306,6 +291,7 @@ class AstVisitor(AstVisitorBase):
         return node.value.n
 
     def visit_Subscript(self, node):
+
         def _create_access_op(opcode):
             op = registers.access[opcode]
             opnode = op(self.ctx.gen_op_name())
@@ -363,8 +349,9 @@ class FunctionDefVisitor(AstVisitor):
             for arg in args.args
         ]
 
-    def _parse_func_returns(self, return_annotation, return_stmt: ast.Return
-                            ) -> Union[None, List[StorageInfoTree]]:
+    def _parse_func_returns(
+            self, return_annotation,
+            return_stmt: ast.Return) -> Union[None, List[StorageInfoTree]]:
         if return_annotation is None:
             raise AnnotationError(('Type annotation for returned value '
                                    'of the function is required.'))
@@ -408,12 +395,12 @@ class FunctionDefVisitor(AstVisitor):
         for x in input_arguments:
             assert isinstance(x, StorageInfoTree)
             for name, storage in x.flatten.items():
-                block.add_input_port(
-                    self.ctx.gen_var_name(name, block, 'def'), storage)
+                block.add_input_port(self.ctx.gen_var_name(name, block, 'def'),
+                                     storage)
 
         for name, storage in output_arguments.flatten.items():
-            block.add_output_port(
-                self.ctx.gen_var_name(name, block, 'gen'), storage)
+            block.add_output_port(self.ctx.gen_var_name(name, block, 'gen'),
+                                  storage)
 
     def process(self, node: ast.FunctionDef, parent=None):
         if not isinstance(node, ast.FunctionDef):
@@ -490,6 +477,7 @@ class ClassDefVisitor(AstVisitor):
 
 
 class ReturnVisitor(AstVisitor):
+
     def __init__(self, ctx):
         super(ReturnVisitor, self).__init__(ctx)
 
@@ -514,6 +502,7 @@ class ReturnVisitor(AstVisitor):
                               f'or tuple of variables, but got {value_node}'))
 
     def get_returned_vars(self, value):
+
         def _get_var(value):
             if not isinstance(value, ast.Name):
                 raise UnsupportedConstruct
@@ -607,12 +596,11 @@ class AssignVisitor(AstVisitor):
         block = self.ctx.peek().partially_parsed_blocks[-1]
 
         for alias, name in zip(lhs, ports):
-            record = NameRecord(
-                gen_name=name,
-                node=None,
-                block=block.name,
-                level=block.depth,
-                var_type='alias')
+            record = NameRecord(gen_name=name,
+                                node=None,
+                                block=block.name,
+                                level=block.depth,
+                                var_type='alias')
             symbol_table.insert(alias, record)
         return
 
@@ -709,31 +697,28 @@ class CallVisitor(AstVisitor):
             output_ports[var] = None
 
         if opcode in kaleido.parser.context._APPLY_TO_EACH:
-            return ApplyToEach(
-                self.ctx.gen_op_name(),
-                opcode,
-                input_ports=input_ports,
-                output_ports=output_ports)
+            return ApplyToEach(self.ctx.gen_op_name(),
+                               opcode,
+                               input_ports=input_ports,
+                               output_ports=output_ports)
         elif opcode in kaleido.parser.context._AGGREGATE:
             # FIXME(ying): by default `scan` and `fold` is interpreted as
             # left associative.
             if opcode == 'scan' or opcode == 'fold':
                 opcode = '{}l'.format(opcode)
 
-            return Aggregate(
-                self.ctx.gen_op_name(),
-                opcode,
-                input_ports=input_ports,
-                output_ports=output_ports)
+            return Aggregate(self.ctx.gen_op_name(),
+                             opcode,
+                             input_ports=input_ports,
+                             output_ports=output_ports)
         else:
             raise NotImplementedError()
 
     def create_tensor_opreation_node(self, opcode: str,
                                      args: List[ast.AST]) -> NodeBase:
         # a primitive tensor operation
-        op = (registers.tensor_primitives[opcode]
-              if opcode in registers.tensor_primitives else
-              registers.access[opcode])
+        op = (registers.tensor_primitives[opcode] if opcode
+              in registers.tensor_primitives else registers.access[opcode])
         node = op(self.ctx.gen_op_name())
 
         has_starred = sum([isinstance(arg, ast.Starred) for arg in args])
@@ -938,11 +923,10 @@ class CallVisitor(AstVisitor):
                         cur_op, 'use')
                     cur_op.add_state_init_port(init_port)
 
-                    block_node.add_edge(
-                        tail=(target_node, target_port),
-                        tip=(cur_op, init_port),
-                        edge_type='in'
-                        if target_node.name == block_node.name else None)
+                    block_node.add_edge(tail=(target_node, target_port),
+                                        tip=(cur_op, init_port),
+                                        edge_type='in' if target_node.name
+                                        == block_node.name else None)
 
                     state_port = self.ctx.gen_var_name(cur_op.name, cur_op,
                                                        'def')
@@ -961,9 +945,9 @@ class CallVisitor(AstVisitor):
 
                 # data flows from the output port of the `initializer` to
                 # `_state_init` port of the `cur_op` which is an Aggregate pattern.
-                block_node.add_edge(
-                    tail=(init, next(reversed(init.output_ports))),
-                    tip=(cur_op, port))
+                block_node.add_edge(tail=(init,
+                                          next(reversed(init.output_ports))),
+                                    tip=(cur_op, port))
 
                 state_port = self.ctx.gen_var_name(
                     '{}@state.{}'.format(cur_op.name, i), cur_op, 'def')
@@ -972,6 +956,7 @@ class CallVisitor(AstVisitor):
                 raise ParseError()
 
     def add_inport_to_parallel_node(self, block: BlockNode, var_name: str):
+
         def _find_parent_block(block):
             for b in self.ctx.peek().partially_parsed_blocks:
                 if b.name == block.name or block.name in b.nodes:
@@ -999,10 +984,9 @@ class CallVisitor(AstVisitor):
             if target_port.endswith(
                     'bodyin') or target_port in target_node.input_ports:
                 edge_type = 'in'
-            target_node.add_edge(
-                tail=(target_node, target_port),
-                tip=(block, input_port_name),
-                edge_type=edge_type)
+            target_node.add_edge(tail=(target_node, target_port),
+                                 tip=(block, input_port_name),
+                                 edge_type=edge_type)
         else:
             # FIXME(ying): check whether this assert fail in the
             # stacked LSTM example.
@@ -1011,8 +995,8 @@ class CallVisitor(AstVisitor):
             if target_port.endswith(
                     'bodyin') or target_port in target_node.input_ports:
                 edge_type = 'in'
-            parent_block.add_edge(
-                tail=(target_node, target_port), tip=(block, input_port_name))
+            parent_block.add_edge(tail=(target_node, target_port),
+                                  tip=(block, input_port_name))
 
     def parse_parallel_pattern_input(self, parallel_node: ParallelNode,
                                      xs: ast.AST):
@@ -1041,9 +1025,8 @@ class CallVisitor(AstVisitor):
                     outport, parallel_node, 'use')
                 parallel_node.add_input_port(input_port_name)
 
-                parent_block.add_edge(
-                    tail=(input_node, outport),
-                    tip=(parallel_node, input_port_name))
+                parent_block.add_edge(tail=(input_node, outport),
+                                      tip=(parallel_node, input_port_name))
 
     def get_parsed_formal_param(
             self, parsed_udf: BlockNode) -> Tuple[List[NodeBase], List[str]]:
@@ -1151,11 +1134,10 @@ class CallVisitor(AstVisitor):
 
                         del node.in_edges[tail]
 
-                        node.add_edge(
-                            (alias_nodes[i], alias_ports[i]),
-                            (tip_node, tip_port),
-                            edge_type='in',
-                            check_edge=False)
+                        node.add_edge((alias_nodes[i], alias_ports[i]),
+                                      (tip_node, tip_port),
+                                      edge_type='in',
+                                      check_edge=False)
                     elif node.opcode == 'block':
                         raise ParseError(('BlockNode only appears '
                                           'at the outmost depth.'))
@@ -1427,12 +1409,11 @@ class LambdaVisitor(AstVisitor):
         if len(arg_names) == 2:
             if len(block._state):
                 for state_port in block._state:
-                    record = NameRecord(
-                        gen_name=state_port,
-                        node=block,
-                        block=block.name,
-                        level=block.depth,
-                        var_type='def')
+                    record = NameRecord(gen_name=state_port,
+                                        node=block,
+                                        block=block.name,
+                                        level=block.depth,
+                                        var_type='def')
                     symbol_table.insert(arg_names[0], record)
             else:
                 raise NotImplementedError(
@@ -1440,19 +1421,17 @@ class LambdaVisitor(AstVisitor):
                      'the Aggregate pattern.'))
 
         for bodyin in block.bodyin:
-            record = NameRecord(
-                gen_name=bodyin,
-                node=None,
-                block=block.name,
-                level=block.depth,
-                var_type='alias')
+            record = NameRecord(gen_name=bodyin,
+                                node=None,
+                                block=block.name,
+                                level=block.depth,
+                                var_type='alias')
             symbol_table.insert(arg_names[in_ids], record)
-            record = NameRecord(
-                gen_name=bodyin,
-                node=block,
-                block=block.name,
-                level=block.depth,
-                var_type='def')
+            record = NameRecord(gen_name=bodyin,
+                                node=block,
+                                block=block.name,
+                                level=block.depth,
+                                var_type='def')
             symbol_table.insert(bodyin, record)
 
         # A BlockNode or an OperationNode is returned.
@@ -1465,8 +1444,8 @@ class LambdaVisitor(AstVisitor):
             assert len(block.output_ports) == 0
             num_out = len(body_node)
             for i in range(num_out):
-                block.add_output_port(
-                    self.ctx.gen_var_name(None, block, 'gen'))
+                block.add_output_port(self.ctx.gen_var_name(
+                    None, block, 'gen'))
 
                 if len(body_node[i].output_ports) > 1:
                     if isinstance(body_node[i], ParallelNode):
@@ -1491,8 +1470,8 @@ class LambdaVisitor(AstVisitor):
             num_out = len(body_node.output_ports)
             assert num_out and len(block.output_ports) == 0
             for i in range(num_out):
-                block.add_output_port(
-                    self.ctx.gen_var_name(None, block, 'gen'))
+                block.add_output_port(self.ctx.gen_var_name(
+                    None, block, 'gen'))
 
             if len(block.out_edges) == 0:
                 out_node = block.search_output_node()
@@ -1506,6 +1485,7 @@ class LambdaVisitor(AstVisitor):
 
 
 class BinOpVisitor(AstVisitor):
+
     def __init__(self, ctx):
         super(BinOpVisitor, self).__init__(ctx)
 
@@ -1516,8 +1496,9 @@ class BinOpVisitor(AstVisitor):
             op = self.ctx.peek().partially_parsed_nodes[-1]
 
             var = operand.id
-            port_name = self.ctx.gen_var_name(
-                name=None, node=op, var_type='use')
+            port_name = self.ctx.gen_var_name(name=None,
+                                              node=op,
+                                              var_type='use')
             op.add_input_port(port_name)
 
             tail_node, tail_port = self.ctx.search_var_generation(var)
@@ -1532,8 +1513,9 @@ class BinOpVisitor(AstVisitor):
                     tip=(op, port_name),
                     edge_type='in' if tail_port.endswith('bodyin') else None)
         else:
-            port_name = self.ctx.gen_var_name(
-                name=None, node=cur_op, var_type='use')
+            port_name = self.ctx.gen_var_name(name=None,
+                                              node=cur_op,
+                                              var_type='use')
             cur_op.add_input_port(port_name)
 
             operand = self.visit(operand)
@@ -1551,9 +1533,9 @@ class BinOpVisitor(AstVisitor):
             else:
                 assert isinstance(operand, NodeBase)
 
-                block.add_edge(
-                    tail=(operand, next(reversed(operand.output_ports))),
-                    tip=(opnode, port_name))
+                block.add_edge(tail=(operand,
+                                     next(reversed(operand.output_ports))),
+                               tip=(opnode, port_name))
 
     def process(self, node: ast.BinOp, parent=None) -> NodeBase:
         if not isinstance(node, ast.BinOp):

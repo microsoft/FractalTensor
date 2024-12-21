@@ -12,33 +12,33 @@ float StackedLstmRegion1(Element* hsss, Element* csss, const Element* xss,
                          const Element* ws, const Element* us, const int depth,
                          const int seq_length, const int batch_size,
                          const int hidden_size) {
-    CudaTimer timer;
-    const Element* x = xss;
-    Element* init;
-    cudaMalloc((void**)&init, sizeof(Element) * hidden_size * batch_size);
-    // Fill zero
-    cudaMemset(reinterpret_cast<void*>(init), 0,
-               sizeof(Element) * hidden_size * batch_size);
+  CudaTimer timer;
+  const Element* x = xss;
+  Element* init;
+  cudaMalloc((void**)&init, sizeof(Element) * hidden_size * batch_size);
+  // Fill zero
+  cudaMemset(reinterpret_cast<void*>(init), 0,
+             sizeof(Element) * hidden_size * batch_size);
 
-    const Element* c_init = init;
-    const Element* h_init = init;
-    const Element* w = ws;
-    const Element* u = us;
-    Element* css = csss;
-    Element* hss = hsss;
+  const Element* c_init = init;
+  const Element* h_init = init;
+  const Element* w = ws;
+  const Element* u = us;
+  Element* css = csss;
+  Element* hss = hsss;
 
-    // TODO: NotFused version.
-    using CuteFusedLSTMLayer =
-        cuda_kernel::CuteLSTMLayer<Element, InstructionShape, ValueMnk,
-                                   WarpArragement, CtaTileShape, WholeShape>;
+  // TODO: NotFused version.
+  using CuteFusedLSTMLayer =
+      cuda_kernel::CuteLSTMLayer<Element, InstructionShape, ValueMnk,
+                                 WarpArragement, CtaTileShape, WholeShape>;
 
-    CuteFusedLSTMLayer cute_fused_lstm_layer;
+  CuteFusedLSTMLayer cute_fused_lstm_layer;
 
-    float time =
-        cute_fused_lstm_layer(w, x, u, c_init, h_init, css, hss, seq_length);
+  float time =
+      cute_fused_lstm_layer(w, x, u, c_init, h_init, css, hss, seq_length);
 
-    CudaCheck(cudaFree(init));
+  CudaCheck(cudaFree(init));
 
-    return time;
+  return time;
 }
 }  // namespace kaleido::core::cuda_kernel

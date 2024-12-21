@@ -5,21 +5,14 @@
 """Looping patterns with explicit access patterns and data dependence information.
 Follows iterative protocol."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from typing import List
-from typing import Tuple
-from typing import Union
-from typing import Callable
-from typing import TypeVar
+from typing import Callable, List, Tuple, TypeVar, Union
 
 import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido import Iterative
-from kaleido.frontend.operations.fractaltensor.functional.base import Functional
+from kaleido import FractalTensor, Iterative, Tensor
+from kaleido.frontend.operations.fractaltensor.functional.base import \
+    Functional
 
 __all__ = [
     'map',
@@ -33,8 +26,9 @@ TA = TypeVar('TA')
 
 
 class Map(Functional):
-    def __call__(self, func: Callable[[T1], T],
-                 xs: Union[Iterative, FractalTensor],
+
+    def __call__(self, func: Callable[[T1], T], xs: Union[Iterative,
+                                                          FractalTensor],
                  **kwargs) -> Union[Tuple[FractalTensor], FractalTensor]:
         """Apply `func` to each element in the FractalTensor or the Iterative.
 
@@ -56,6 +50,7 @@ map = Map()
 
 
 class Filter(Functional):
+
     def __call__(self, condition: Callable[[T1], bool],
                  xs: Union[Iterative, FractalTensor],
                  **kwargs) -> Union[Tuple[FractalTensor], FractalTensor]:
@@ -86,6 +81,7 @@ filter = Filter()
 
 
 class DilatedMap(Functional):
+
     def _dilate(self, x: FractalTensor[T],
                 dilation: int) -> FractalTensor[FractalTensor[T]]:
         """Dilate input x adaptive to its length.

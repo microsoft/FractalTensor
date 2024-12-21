@@ -4,19 +4,19 @@
 # --------------------------------------------------------------------------
 
 import os
+
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 import unittest
 from time import time
 
 import torch
-from pt_model import StackedDRNNJIT
-from pt_model import StackedDRNN
-
+from pt_model import StackedDRNN, StackedDRNNJIT
 from utils import *
 
 
 class PytorchDRNN(unittest.TestCase):
+
     def setUp(self):
         torch.manual_seed(1234)
         self.log_dir = ''
@@ -73,13 +73,12 @@ class PytorchDRNN(unittest.TestCase):
                         'cuda:0',
                 ]:
                     x = torch.randn(*shape, device=device, dtype=torch.float16)
-                    net = StackedDRNNJIT(
-                        batch_size=BATCH_SIZE,
-                        seq_len=SEQ_LEN,
-                        dilation=DILATION,
-                        input_size=INPUT_SIZE,
-                        hidden_size=HIDDEN_SIZE,
-                        device=device).to(device)
+                    net = StackedDRNNJIT(batch_size=BATCH_SIZE,
+                                         seq_len=SEQ_LEN,
+                                         dilation=DILATION,
+                                         input_size=INPUT_SIZE,
+                                         hidden_size=HIDDEN_SIZE,
+                                         device=device).to(device)
                     net.eval()
 
                     script_module = net
@@ -130,18 +129,16 @@ class PytorchDRNN(unittest.TestCase):
 
                 def build_data(test_case):
                     seq_len, batch_size, hidden, num_layers = test_case
-                    x = torch.randn(
-                        (seq_len, batch_size, hidden),
-                        device=device,
-                        dtype=torch.float16)
-                    net = StackedDRNNJIT(
-                        batch_size=batch_size,
-                        seq_len=seq_len,
-                        input_size=hidden,
-                        hidden_size=hidden,
-                        dilation=DILATION[0:num_layers],
-                        device=device,
-                        dtype=torch.float16).to(device)
+                    x = torch.randn((seq_len, batch_size, hidden),
+                                    device=device,
+                                    dtype=torch.float16)
+                    net = StackedDRNNJIT(batch_size=batch_size,
+                                         seq_len=seq_len,
+                                         input_size=hidden,
+                                         hidden_size=hidden,
+                                         dilation=DILATION[0:num_layers],
+                                         device=device,
+                                         dtype=torch.float16).to(device)
                     net.eval()
                     script_module = torch.jit.script(net)
 

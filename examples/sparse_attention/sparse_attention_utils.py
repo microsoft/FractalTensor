@@ -3,15 +3,12 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import torch
-
 import random
 
+import torch
+
 import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido import TensorStorage
-from kaleido import FractalTensorStorage
+from kaleido import FractalTensor, FractalTensorStorage, Tensor, TensorStorage
 
 # device = 'cpu'
 device = 'cuda'
@@ -46,15 +43,15 @@ def create_blocked_input(batch_size: int,
 
     x = FractalTensor(
         FractalTensorStorage(
-            TensorStorage(
-                (block_size, hidden), kaleido.float32, device=device)))
+            TensorStorage((block_size, hidden), kaleido.float32,
+                          device=device)))
     x.indices = [list(range(block_num)) for _ in range(batch_size)]
     x.initialize(torch.rand, *x.flatten_shape, device=device)
     return x
 
 
 def gen_random_atten_indices(
-        batch_size: int, n_heads: int, seq_len: int, N: int, random_num: int
+    batch_size: int, n_heads: int, seq_len: int, N: int, random_num: int
 ) -> FractalTensor[FractalTensor[FractalTensor[Tensor['1, 3', int, 'cuda']]]]:
     """
     NOTE, this is a fake implementation wher random attention positions are
@@ -67,8 +64,8 @@ def gen_random_atten_indices(
             indices_seq = []
             for k in range(N):
                 t = Tensor((1, random_num), kaleido.int32, device=device)
-                t.data = torch.IntTensor(
-                    random.sample(list(range(seq_len)), 3)).to(device)
+                t.data = torch.IntTensor(random.sample(list(range(seq_len)),
+                                                       3)).to(device)
                 indices_seq.append(t)
             indices_head.append(FractalTensor.from_tensors(*indices_seq))
         random_indices.append(FractalTensor.from_fractaltensors(*indices_head))

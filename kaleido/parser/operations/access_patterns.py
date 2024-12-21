@@ -3,18 +3,14 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from typing import Tuple
 from collections import OrderedDict
+from typing import Tuple
 
-from kaleido.frontend.types import Storage
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import FractalTensorStorage
-from kaleido.parser.operations.common import registers
+from kaleido.frontend.types import FractalTensorStorage, Storage, TensorStorage
 from kaleido.parser.ir_nodes import AccessNode
+from kaleido.parser.operations.common import registers
 
 
 @registers.access.register

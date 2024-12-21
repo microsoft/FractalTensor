@@ -3,13 +3,13 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import torch
+import argparse
+import os
 
+import torch
 import triton
 import triton.language as tl
-import argparse
 
-import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 
@@ -190,10 +190,12 @@ def backToBackGemm_kernel(
         c = tl.load(c_block_ptr, boundary_check=(0, ), padding_option='zero')
         p = tl.zeros([BLOCK_SIZE_M, BLOCK_SIZE_N], dtype=tl.float32)
         for start_k in range(0, K, BLOCK_SIZE_K):
-            a = tl.load(
-                a_block_ptr, boundary_check=(1, ), padding_option='zero')
-            b = tl.load(
-                b_block_ptr, boundary_check=(0, 1), padding_option='zero')
+            a = tl.load(a_block_ptr,
+                        boundary_check=(1, ),
+                        padding_option='zero')
+            b = tl.load(b_block_ptr,
+                        boundary_check=(0, 1),
+                        padding_option='zero')
             p += tl.dot(a, b)
             # p = p.to(tl.float16)
             a_block_ptr = tl.advance(a_block_ptr, (0, BLOCK_SIZE_K))
@@ -226,23 +228,22 @@ def backToBackGemm(a, b, c):
         return (triton.cdiv(M, META['BLOCK_SIZE_M']),
                 triton.cdiv(P, META['BLOCK_SIZE_P']), 1)
 
-    backToBackGemm_kernel[grid](
-        a_ptr=a,
-        b_ptr=b,
-        c_ptr=c,
-        d_ptr=d,
-        M=M,
-        N=N,
-        K=K,
-        P=P,
-        stride_am=a.stride(0),
-        stride_ak=a.stride(1),
-        stride_bk=b.stride(0),
-        stride_bn=b.stride(1),
-        stride_cn=c.stride(0),
-        stride_cp=c.stride(1),
-        stride_dm=c.stride(0),
-        stride_dp=c.stride(1))
+    backToBackGemm_kernel[grid](a_ptr=a,
+                                b_ptr=b,
+                                c_ptr=c,
+                                d_ptr=d,
+                                M=M,
+                                N=N,
+                                K=K,
+                                P=P,
+                                stride_am=a.stride(0),
+                                stride_ak=a.stride(1),
+                                stride_bk=b.stride(0),
+                                stride_bn=b.stride(1),
+                                stride_cn=c.stride(0),
+                                stride_cp=c.stride(1),
+                                stride_dm=c.stride(0),
+                                stride_dp=c.stride(1))
     return d
 
 
@@ -265,12 +266,12 @@ def run_test(test_case, OUTPUT_FILE):
         b = torch.randn((K, N), device='cuda', dtype=torch.float16)
         c = torch.randn((N, P), device='cuda', dtype=torch.float16)
         # accept_test(a, b, c)
-        ms = triton.testing.do_bench(
-            lambda: backToBackGemm(a, b, c),
-            warmup=25,
-            rep=100,
-            return_mode='mean')
-        print(f"[{M}, {K}][{K}, {N}][{N}, {P}]\t" f"Baseline(ms): {ms}ms")
+        ms = triton.testing.do_bench(lambda: backToBackGemm(a, b, c),
+                                     warmup=25,
+                                     rep=100,
+                                     return_mode='mean')
+        print(f"[{M}, {K}][{K}, {N}][{N}, {P}]\t"
+              f"Baseline(ms): {ms}ms")
         if OUTPUT_FILE:
             with open(OUTPUT_FILE, 'a') as fout:
                 fout.write(f"[{M}, {K}][{K}, {N}][{N}, {P}]\t"
@@ -279,8 +280,10 @@ def run_test(test_case, OUTPUT_FILE):
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='BacktoBack GEMMs')
-    parser.add_argument(
-        '--output_file', type=str, help='Output file path', default=None)
+    parser.add_argument('--output_file',
+                        type=str,
+                        help='Output file path',
+                        default=None)
     return parser.parse_args()
 
 

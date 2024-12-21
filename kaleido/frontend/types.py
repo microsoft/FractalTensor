@@ -14,26 +14,18 @@
        type.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from anytree import NodeMixin
-from anytree import RenderTree
-from anytree import AsciiStyle
 import copy
-from collections.abc import Sequence
-from collections import OrderedDict
-from typing import Tuple
-from typing import List
-from typing import Union
-from typing import TypeVar
-
-import itertools
 import functools
+import itertools
 import operator
+from collections import OrderedDict
+from collections.abc import Sequence
+from typing import List, Tuple, TypeVar, Union
 
 import torch
+from anytree import AsciiStyle, NodeMixin, RenderTree
 
 __all__ = [
     'float32',  # TODO(ying), singleton from metaclass
@@ -60,6 +52,7 @@ class Storage(object):
 
 
 class Number(Storage):
+
     def __init__(self, byte, signed):
         """Type constructor for basic type."""
 
@@ -100,11 +93,13 @@ class Number(Storage):
 
 
 class Int(Number):
+
     def __init__(self, byte):
         super(Int, self).__init__(byte, signed=1)
 
 
 class Real(Number):
+
     def __init__(self, byte):
         super(Real, self).__init__(byte, signed=1)
 
@@ -117,6 +112,7 @@ class Real(Number):
 
 
 class Bool(Number):
+
     def __init__(self):
         super(Bool, self).__init__(byte=64, signed=0)
 
@@ -159,6 +155,7 @@ FT = TypeVar('FT')
 
 
 class StaticListStorage(Storage):
+
     def __init__(self, dtype: str, length: int):
         self.dtype = dtype
         self.length = length
@@ -178,6 +175,7 @@ class StaticListStorage(Storage):
 
 
 class TensorStorage(Storage):
+
     def __init__(self,
                  shape: Tuple[int],
                  dtype: Number,
@@ -293,6 +291,7 @@ class TensorStorage(Storage):
 
 
 class FractalTensorStorage(Storage):
+
     def __init__(self, dtype: Union[Number, TensorStorage, FT]):
         """Type construtor of FractalTensor."""
 
@@ -440,6 +439,7 @@ class LiteralConstant(Storage):
 
 
 class StorageInfoTree(NodeMixin, Sequence):
+
     def __init__(self, name, storage=None, parent=None):
         super(StorageInfoTree, self).__init__()
         self.name = name
@@ -449,6 +449,7 @@ class StorageInfoTree(NodeMixin, Sequence):
 
     @property
     def numel(self):
+
         def _numel(root) -> int:
             if root.is_leaf:
                 return 1
@@ -465,6 +466,7 @@ class StorageInfoTree(NodeMixin, Sequence):
 
     @property
     def flatten(self) -> List[Tuple[str, Storage]]:
+
         def _flatten(root, rvs, prefix):
             if root.is_leaf:
                 rvs[prefix] = root.storage

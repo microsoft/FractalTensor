@@ -5,23 +5,18 @@
 
 from __future__ import print_function
 
-from context import *
-
-from typing import Tuple
-from typing import NamedTuple
 from collections import OrderedDict
+from typing import NamedTuple, Tuple
 
 import torch
+from context import *
 
 import kaleido
+from kaleido import FractalTensor, Tensor
 from kaleido import operations as ops
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import FractalTensorStorage
-
-from kaleido.parser.tests.utils import *
+from kaleido.frontend.types import FractalTensorStorage, TensorStorage
 from kaleido.parser.plot import PlotProgram
+from kaleido.parser.tests.utils import *
 
 ctx1 = kaleido.Context()
 
@@ -35,12 +30,14 @@ def udf1(x: Tensor['5, 17', float, 'cpu'],
 
 
 @kaleido.function(ctx1)
-def f1(xs: FractalTensor[Tensor['5, 17', float, 'cpu']]
-       ) -> FractalTensor[Tensor['5, 17', float, 'cpu']]:
-    zs = ops.scan(
-        lambda s, x: udf1(s, x),
-        xs,
-        initializer=ops.zeros(shape=(5, 17), device='cpu', dtype='float'))
+def f1(
+    xs: FractalTensor[Tensor['5, 17', float, 'cpu']]
+) -> FractalTensor[Tensor['5, 17', float, 'cpu']]:
+    zs = ops.scan(lambda s, x: udf1(s, x),
+                  xs,
+                  initializer=ops.zeros(shape=(5, 17),
+                                        device='cpu',
+                                        dtype='float'))
     return zs
 
 
@@ -55,12 +52,14 @@ def udf2(a: Tensor['1, 128', float, 'cpu'], b: Tensor['1, 128', float, 'cpu'],
 
 
 @kaleido.function(ctx2)
-def f2(xs: FractalTensor[Tensor['1, 128', float, 'cpu']]
-       ) -> FractalTensor[Tensor['1, 128', float, 'cpu']]:
-    ys = ops.scan(
-        lambda s, x: udf2(x, s, s),
-        xs,
-        initializer=ops.zeros(shape=(1, 128), device='cpu', dtype='float'))
+def f2(
+    xs: FractalTensor[Tensor['1, 128', float, 'cpu']]
+) -> FractalTensor[Tensor['1, 128', float, 'cpu']]:
+    ys = ops.scan(lambda s, x: udf2(x, s, s),
+                  xs,
+                  initializer=ops.zeros(shape=(1, 128),
+                                        device='cpu',
+                                        dtype='float'))
     return ys
 
 
@@ -77,18 +76,21 @@ def udf3(a: Tensor['1, 128', float, 'cpu'], b: Tensor['1, 128', float, 'cpu'],
 
 
 @kaleido.function(ctx3)
-def f3(xs: FractalTensor[Tensor['1, 128', float, 'cpu']],
-       ys: FractalTensor[Tensor['1, 128', float, 'cpu']],
-       z: Tensor['128, 64', float, 'cpu']
-       ) -> FractalTensor[Tensor['1, 128', float, 'cpu']]:
-    zs = ops.scan(
-        lambda s, x: udf3(*x, s, z),
-        ops.zip(xs, ys),
-        initializer=ops.zeros(shape=(1, 128), device='cpu', dtype='float'))
+def f3(
+    xs: FractalTensor[Tensor['1, 128', float, 'cpu']],
+    ys: FractalTensor[Tensor['1, 128', float, 'cpu']], z: Tensor['128, 64',
+                                                                 float, 'cpu']
+) -> FractalTensor[Tensor['1, 128', float, 'cpu']]:
+    zs = ops.scan(lambda s, x: udf3(*x, s, z),
+                  ops.zip(xs, ys),
+                  initializer=ops.zeros(shape=(1, 128),
+                                        device='cpu',
+                                        dtype='float'))
     return zs
 
 
 class TestParallelPatterns(unittest.TestCase):
+
     def setUp(self):
         L1 = 11
         L2 = 13

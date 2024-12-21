@@ -3,20 +3,18 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import time
-import sys
-import math
-import unittest
-import os
-import logging
 import datetime
+import logging
+import math
+import os
+import sys
+import time
+import unittest
 
-import test_utils as tu
 import tensorflow as tf
-
-from tf_model import WhileOpGridLSTMNet
-from tf_model import BaseWhileOpGridLSTMNet
-from tf_model import FineGrainedOpGridLSTMNet
+import test_utils as tu
+from tf_model import (BaseWhileOpGridLSTMNet, FineGrainedOpGridLSTMNet,
+                      WhileOpGridLSTMNet)
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Only print error information.
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -24,12 +22,18 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='Girdlstm')
-    parser.add_argument(
-        '--seq_len', type=int, help='Sequence length', default=10)
-    parser.add_argument(
-        '--batch_size', type=int, help='Batch size', default=32)
-    parser.add_argument(
-        '--hidden_size', type=int, help='Hidden size', default=256)
+    parser.add_argument('--seq_len',
+                        type=int,
+                        help='Sequence length',
+                        default=10)
+    parser.add_argument('--batch_size',
+                        type=int,
+                        help='Batch size',
+                        default=32)
+    parser.add_argument('--hidden_size',
+                        type=int,
+                        help='Hidden size',
+                        default=256)
     parser.add_argument('--depth', type=int, help='Depth size', default=4)
     return parser.parse_args()
 
@@ -72,8 +76,8 @@ class TFGraphGridLSTM(unittest.TestCase):
         """
         elapsed_time = time.time() - start
         average_time = elapsed_time / TFGraphGridLSTM.ITERS
-        seq_per_sec = (
-            TFGraphGridLSTM.ITERS * TFGraphGridLSTM.BATCH_SIZE) / elapsed_time
+        seq_per_sec = (TFGraphGridLSTM.ITERS *
+                       TFGraphGridLSTM.BATCH_SIZE) / elapsed_time
         self.logger.info(("|%s|%.4f\t|%.4f\t|%.4f|") %
                          (test_name, average_time, elapsed_time, seq_per_sec))
         print((
@@ -89,10 +93,12 @@ class TFGraphGridLSTM(unittest.TestCase):
         """
 
         with tf.device(tu.device(dev)):
-            source = tf.random.uniform(
-                self.shape, minval=-self.stddev, maxval=self.stddev)
-            target = tf.random.uniform(
-                self.shape, minval=-self.stddev, maxval=self.stddev)
+            source = tf.random.uniform(self.shape,
+                                       minval=-self.stddev,
+                                       maxval=self.stddev)
+            target = tf.random.uniform(self.shape,
+                                       minval=-self.stddev,
+                                       maxval=self.stddev)
 
             output = model(source, target)
 
@@ -121,22 +127,25 @@ class TFGraphGridLSTM(unittest.TestCase):
                 "cpu",
                 "gpu",
         ]:
-            model = FineGrainedOpGridLSTMNet(
-                TFGraphGridLSTM.NUM_LAYERS, TFGraphGridLSTM.SEQ_LEN,
-                TFGraphGridLSTM.SEQ_LEN, TFGraphGridLSTM.BATCH_SIZE,
-                TFGraphGridLSTM.HIDDEN)
-            self._apply_forward(
-                device, f"graph_finegrained_op_lstm_{device}_forward", model)
+            model = FineGrainedOpGridLSTMNet(TFGraphGridLSTM.NUM_LAYERS,
+                                             TFGraphGridLSTM.SEQ_LEN,
+                                             TFGraphGridLSTM.SEQ_LEN,
+                                             TFGraphGridLSTM.BATCH_SIZE,
+                                             TFGraphGridLSTM.HIDDEN)
+            self._apply_forward(device,
+                                f"graph_finegrained_op_lstm_{device}_forward",
+                                model)
 
     def test_while_op_lstm_forward(self):
         for device in [
                 "cpu",
                 "gpu",
         ]:
-            model = WhileOpGridLSTMNet(
-                TFGraphGridLSTM.NUM_LAYERS, TFGraphGridLSTM.SEQ_LEN,
-                TFGraphGridLSTM.SEQ_LEN, TFGraphGridLSTM.BATCH_SIZE,
-                TFGraphGridLSTM.HIDDEN)
+            model = WhileOpGridLSTMNet(TFGraphGridLSTM.NUM_LAYERS,
+                                       TFGraphGridLSTM.SEQ_LEN,
+                                       TFGraphGridLSTM.SEQ_LEN,
+                                       TFGraphGridLSTM.BATCH_SIZE,
+                                       TFGraphGridLSTM.HIDDEN)
             self._apply_forward(device,
                                 f"graph_while_op_lstm_{device}_forward", model)
 
@@ -146,8 +155,9 @@ class TFGraphGridLSTM(unittest.TestCase):
                 "gpu",
         ]:
             model = BaseWhileOpGridLSTMNet(TFGraphGridLSTM.HIDDEN)
-            self._apply_forward(
-                device, f"graph_base_while_op_lstm_{device}_forward", model)
+            self._apply_forward(device,
+                                f"graph_base_while_op_lstm_{device}_forward",
+                                model)
 
 
 if __name__ == "__main__":

@@ -3,13 +3,9 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from typing import Union
-from typing import Tuple
-from typing import List
-from typing import TypeVar
+from __future__ import absolute_import, division, print_function
+
+from typing import List, Tuple, TypeVar, Union
 
 import torch
 
@@ -22,11 +18,8 @@ import functools
 import operator
 
 import kaleido
+from kaleido import FractalTensor, FractalTensorStorage, Tensor, TensorStorage
 from kaleido.frontend.operations.base import Access
-from kaleido import Tensor
-from kaleido import TensorStorage
-from kaleido import FractalTensor
-from kaleido import FractalTensorStorage
 
 __all__ = [
     'stack',
@@ -39,6 +32,7 @@ __all__ = [
 
 
 class Flatten(Access):
+
     def __call__(self, x: FractalTensor, dim: int = 0) -> Tensor:
         """Convert a nested FractalTensor variable into a Tensor variable.
 
@@ -85,6 +79,7 @@ flatten = Flatten()
 
 
 class Stack(Access):
+
     def __call__(self, xs: List[Tensor], dim: int = 0):
         assert (len(xs))
 
@@ -98,6 +93,7 @@ stack = Stack()
 
 
 class Slices(Access):
+
     def __call__(self, x: Tensor, dim: int) -> FractalTensor:
         """Return slices of a tensor along the given dim.
 
@@ -136,6 +132,7 @@ slices = Slices()
 
 
 class Unbind(Access):
+
     def __call__(self, xs: FractalTensor):
         return [x for x in xs]
 
@@ -144,8 +141,10 @@ unbind = Unbind()
 
 
 class Repeat(Access):
-    def __call__(self, a: Union[Tensor, FractalTensor[T]], repeats: int
-                 ) -> Union[FractalTensor[T], FractalTensor[FractalTensor[T]]]:
+
+    def __call__(
+        self, a: Union[Tensor, FractalTensor[T]], repeats: int
+    ) -> Union[FractalTensor[T], FractalTensor[FractalTensor[T]]]:
         """Repeat a FractalTensor.
 
         Args:
@@ -181,6 +180,7 @@ repeat = Repeat()
 
 
 class Split(Access):
+
     def __call__(self,
                  a: Union[Tensor, FractalTensor[T]],
                  num: int,

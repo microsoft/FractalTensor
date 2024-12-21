@@ -14,41 +14,40 @@ namespace ops {
 
 template <typename T>
 class FillOp<GPUContext, CUDAPlace, T> {
-   public:
-    void operator()(Tensor& input, float value) {
-        int numel = static_cast<int>(input.numel());
-        T* data = input.mutable_data<T>();
+public:
+  void operator()(Tensor& input, float value) {
+    int numel = static_cast<int>(input.numel());
+    T* data = input.mutable_data<T>();
 
-        int threads = 128;
-        int blocks = DIVUP(numel, threads);
-        cuda_kernel::KeFillValue<T><<<blocks, threads>>>(data, numel, value);
+    int threads = 128;
+    int blocks = DIVUP(numel, threads);
+    cuda_kernel::KeFillValue<T><<<blocks, threads>>>(data, numel, value);
+  }
+
+  void operator()(Tensor& input) {
+    T* data = input.mutable_data<T>();
+    int num = static_cast<int>(input.numel());
+    cuda_kernel::FillRandomValue<T>(data, num);
+  }
+
+  void operator()(Tensor& input, float mean = 0, float stddev = 0.1) {
+    T* data = input.mutable_data<T>();
+    int num = static_cast<int>(input.numel());
+    cuda_kernel::FillRandomValue<T>(data, num, mean, stddev);
+  }
+
+  void operator()(Tensor& input, const std::string& mode, float scale = 1.) {
+    if (mode == "seq") {
+      T* data = input.mutable_data<T>();
+      int64_t numel = input.numel();
+
+      int threads = 128;
+      int blocks = DIVUP(numel, threads);
+      cuda_kernel::KeFillSequential<T><<<blocks, threads>>>(data, numel, scale);
+    } else {
+      LOG(FATAL) << "Unknown mode: " << mode << std::endl;
     }
-
-    void operator()(Tensor& input) {
-        T* data = input.mutable_data<T>();
-        int num = static_cast<int>(input.numel());
-        cuda_kernel::FillRandomValue<T>(data, num);
-    }
-
-    void operator()(Tensor& input, float mean = 0, float stddev = 0.1) {
-        T* data = input.mutable_data<T>();
-        int num = static_cast<int>(input.numel());
-        cuda_kernel::FillRandomValue<T>(data, num, mean, stddev);
-    }
-
-    void operator()(Tensor& input, const std::string& mode, float scale = 1.) {
-        if (mode == "seq") {
-            T* data = input.mutable_data<T>();
-            int64_t numel = input.numel();
-
-            int threads = 128;
-            int blocks = DIVUP(numel, threads);
-            cuda_kernel::KeFillSequential<T>
-                <<<blocks, threads>>>(data, numel, scale);
-        } else {
-            LOG(FATAL) << "Unknown mode: " << mode << std::endl;
-        }
-    }
+  }
 };
 
 template class FillOp<GPUContext, CUDAPlace, float>;

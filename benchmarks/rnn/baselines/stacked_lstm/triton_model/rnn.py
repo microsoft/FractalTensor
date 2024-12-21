@@ -3,22 +3,21 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import Tuple
-from typing import List
+from time import time
+from typing import List, Tuple
 
-import torch.jit as jit
 import torch
+import torch.jit as jit
 import torch.nn as nn
+from torch import Tensor
 from torch.nn import Parameter
 from torch.nn.init import xavier_normal_ as init
-from torch import Tensor
-
-from time import time
 
 from .op import *
 
 
 class LSTMCell(nn.Module):
+
     def __init__(self,
                  input_size: int,
                  hidden_size: int,
@@ -31,37 +30,45 @@ class LSTMCell(nn.Module):
         self.size = (input_size, hidden_size, batch_size)
         self.Wi = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Wf = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Wo = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Wg = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
 
         self.Ui = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Uf = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Uo = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Ug = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
 
         self.bi = nn.Parameter(
             torch.ones([hidden_size], device=device, dtype=dtype))
@@ -73,10 +80,10 @@ class LSTMCell(nn.Module):
             torch.ones([hidden_size], device=device, dtype=dtype))
 
     def forward(
-            self,
-            input: Tensor,
-            state_prev: Tuple[Tensor, Tensor],
-            state_now: Tuple[Tensor, Tensor],
+        self,
+        input: Tensor,
+        state_prev: Tuple[Tensor, Tensor],
+        state_now: Tuple[Tensor, Tensor],
     ) -> Tuple[Tensor, Tensor]:
 
         h, c = LSTMscan(input, (self.Wi, self.Wf, self.Wo, self.Wg, self.Ui,
@@ -88,6 +95,7 @@ class LSTMCell(nn.Module):
 
 
 class StackedLSTM(nn.Module):
+
     def __init__(self,
                  batch_size: int,
                  max_seq_length: int,
@@ -108,22 +116,22 @@ class StackedLSTM(nn.Module):
     def forward(self, input):
         xs = input
         batch_size, hidden_size = self.size
-        h_resident = torch.empty(
-            [batch_size, hidden_size], device=self.device, dtype=self.dtype)
-        c_resident = torch.empty(
-            [batch_size, hidden_size], device=self.device, dtype=self.dtype)
+        h_resident = torch.empty([batch_size, hidden_size],
+                                 device=self.device,
+                                 dtype=self.dtype)
+        c_resident = torch.empty([batch_size, hidden_size],
+                                 device=self.device,
+                                 dtype=self.dtype)
         hiddens = []
         cells = []
         for rnn in self.cells:
 
-            h = torch.zeros(
-                (batch_size, hidden_size),
-                device=self.device,
-                dtype=self.dtype)
-            c = torch.zeros(
-                (batch_size, hidden_size),
-                device=self.device,
-                dtype=self.dtype)
+            h = torch.zeros((batch_size, hidden_size),
+                            device=self.device,
+                            dtype=self.dtype)
+            c = torch.zeros((batch_size, hidden_size),
+                            device=self.device,
+                            dtype=self.dtype)
 
             hs = []
             cs = []

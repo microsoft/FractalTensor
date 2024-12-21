@@ -3,26 +3,17 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
+
+from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
+from typing import Dict, List, Tuple, TypeVar, Union
 
 from absl import logging
-from collections import OrderedDict
-from abc import ABCMeta
-from abc import abstractmethod
-from typing import Union
-from typing import List
-from typing import Tuple
-from typing import Dict
-from typing import TypeVar
 
 import kaleido
-from kaleido.frontend.types import Storage
-from kaleido.frontend.types import StorageInfoTree
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import FractalTensorStorage
-from kaleido.frontend.types import Number
+from kaleido.frontend.types import (FractalTensorStorage, Number, Storage,
+                                    StorageInfoTree, TensorStorage)
 from kaleido.parser.errors import ParseError
 
 __all__ = [
@@ -180,7 +171,8 @@ class NodeBase(object):
 
         return name
 
-    def add_output_port(self, name: str = None,
+    def add_output_port(self,
+                        name: str = None,
                         storage: Storage = None) -> str:
         """A Port is a pair of <identifier, Storage>. Order is important.
 
@@ -286,6 +278,7 @@ class OperationNode(NodeBase, metaclass=ABCMeta):
 
 
 class Elementwise(OperationNode):
+
     def __init__(self, name, input_ports, output_ports, *args, **kwargs):
         super(Elementwise, self).__init__(name, input_ports, output_ports,
                                           *args, **kwargs)
@@ -395,12 +388,11 @@ class BlockNode(NodeBase):
 
     def __init__(self, name: str, input_ports: Dict, output_ports: Dict, *args,
                  **kwargs):
-        super(BlockNode, self).__init__(
-            name,
-            input_ports=input_ports,
-            output_ports=output_ports,
-            *args,
-            **kwargs)
+        super(BlockNode, self).__init__(name,
+                                        input_ports=input_ports,
+                                        output_ports=output_ports,
+                                        *args,
+                                        **kwargs)
 
         self.nodes: OrderedDict[str, NodeBase] = OrderedDict()
 
@@ -505,6 +497,7 @@ class BlockNode(NodeBase):
         return True
 
     def get_storage_info_over_edge(self, tail, tip):
+
         def _tip_port_in_node(target_port: str, node: NodeBase):
             if target_port in node.input_ports:
                 return node.input_ports[target_port]
@@ -547,8 +540,8 @@ class BlockNode(NodeBase):
             # block, this branch is hit.
             raise ValueError()
 
-    def add_input_node(self, node: NodeBase,
-                       *in_edges: Tuple[Tuple[str, str]]):
+    def add_input_node(self, node: NodeBase, *in_edges: Tuple[Tuple[str,
+                                                                    str]]):
         """
         If a node is specified as the input node of a ParallelNode, special
         edges (flow of data) shown below are automatically added: from one of
@@ -592,8 +585,8 @@ class BlockNode(NodeBase):
             else:
                 self.in_edges[tail].append(head)
 
-    def add_output_node(self, node: NodeBase,
-                        *out_edges: Tuple[Tuple[str, str]]):
+    def add_output_node(self, node: NodeBase, *out_edges: Tuple[Tuple[str,
+                                                                      str]]):
         """
         If a node is specified as the output node of a ParallelNode, special
         edges (flow of data) shown below are automatically added: from one of
@@ -638,6 +631,7 @@ class BlockNode(NodeBase):
         node.depth = max(depth, node.depth)
 
     def _check_tail(self, node: NodeBase, port: str):
+
         def _check_port(node: NodeBase, target_port: str):
             if not target_port in node.output_ports:
                 if isinstance(node, BlockNode):

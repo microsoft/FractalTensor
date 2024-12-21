@@ -3,15 +3,13 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
+from __future__ import absolute_import, division, print_function
 
 import random
+
+import kaleido
+from kaleido import FractalTensor, Tensor
+
 random.seed(12345)
 
 MIN_LEN = 4

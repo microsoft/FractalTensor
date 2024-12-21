@@ -3,9 +3,9 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import os
-import logging
 import argparse
+import logging
+import os
 from time import time
 
 
@@ -30,23 +30,34 @@ def str2bool(v):
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='Girdlstm')
-    parser.add_argument(
-        '--seq_len', type=int, help='Sequence length', default=50)
-    parser.add_argument(
-        '--batch_size', type=int, help='Batch size', default=256)
-    parser.add_argument(
-        '--hidden_size', type=int, help='Hidden size', default=256)
-    parser.add_argument(
-        '--input_size', type=int, help='Input size', default=256)
-    parser.add_argument(
-        '--depth', type=max_dilation, help='Depth size', default=1)
-    parser.add_argument(
-        '--output_file', type=str, help='Output file path', default=None)
-    parser.add_argument(
-        '--default_test',
-        type=str2bool,
-        help='Whether to run the default test',
-        default=False)
+    parser.add_argument('--seq_len',
+                        type=int,
+                        help='Sequence length',
+                        default=50)
+    parser.add_argument('--batch_size',
+                        type=int,
+                        help='Batch size',
+                        default=256)
+    parser.add_argument('--hidden_size',
+                        type=int,
+                        help='Hidden size',
+                        default=256)
+    parser.add_argument('--input_size',
+                        type=int,
+                        help='Input size',
+                        default=256)
+    parser.add_argument('--depth',
+                        type=max_dilation,
+                        help='Depth size',
+                        default=1)
+    parser.add_argument('--output_file',
+                        type=str,
+                        help='Output file path',
+                        default=None)
+    parser.add_argument('--default_test',
+                        type=str2bool,
+                        help='Whether to run the default test',
+                        default=False)
     return parser.parse_args()
 
 

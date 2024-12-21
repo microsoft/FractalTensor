@@ -3,16 +3,12 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
+from typing import List, Tuple
+
 import torch
 
-from typing import Tuple
-from typing import List
-
 import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido import TensorStorage
-from kaleido import FractalTensorStorage
+from kaleido import FractalTensor, FractalTensorStorage, Tensor, TensorStorage
 from kaleido import operations as ops
 
 seq_len = 10

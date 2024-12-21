@@ -15,7 +15,7 @@ using RowMajor =
 
 __device__ auto make_row_major_layout(const int row, const int col,
                                       const int stride) {
-    return cute::make_layout(make_shape(row, col), make_stride(stride, 1));
+  return cute::make_layout(make_shape(row, col), make_stride(stride, 1));
 }
 
 // In the column major layout, the contiguous dimension in memory is the
@@ -26,7 +26,7 @@ using ColMajor =
 
 __device__ auto make_col_major_layout(const int row, const int col,
                                       const int stride) {
-    return cute::make_layout(make_shape(row, col), make_stride(1, stride));
+  return cute::make_layout(make_shape(row, col), make_stride(1, stride));
 }
 
 template <typename Layout>
