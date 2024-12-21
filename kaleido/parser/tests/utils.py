@@ -4,18 +4,16 @@
 # --------------------------------------------------------------------------
 
 import ast
-import asttokens
 import inspect
-import astpretty
 import textwrap
 
+import astpretty
+import asttokens
 import torch
 
 import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import FractalTensorStorage
+from kaleido import FractalTensor, Tensor
+from kaleido.frontend.types import FractalTensorStorage, TensorStorage
 
 __all__ = [
     'get_ast',
@@ -49,8 +47,8 @@ def create_fractaltensor(size, length):
 
 def create_depth2_fractaltensor(size, length1, length2):
     xss = FractalTensor(
-        FractalTensorStorage(
-            TensorStorage(size, kaleido.float32, device='cpu')))
+        FractalTensorStorage(TensorStorage(size, kaleido.float32,
+                                           device='cpu')))
     xss.indices = [list(range(length1)) for _ in range(length2)]
     xss.initialize(torch.rand, *xss.flatten_shape)
     return xss

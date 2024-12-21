@@ -3,14 +3,13 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import context
-
 from typing import NamedTuple
+
+import context
+from sparse_attention_utils import *
 
 import kaleido
 from kaleido import operations as ops
-
-from sparse_attention_utils import *
 
 ctx = kaleido.Context()
 
@@ -23,12 +22,14 @@ class AttnParams(NamedTuple):
 
 
 # @kaleido.function(ctx)
-def sparse_attn(query_token: Tensor['1, 64', float, 'cuda'],
-                w_keys: FractalTensor[Tensor['1, 64', float, 'cuda']],
-                r_keys: FractalTensor[Tensor['1, 64', float, 'cuda']],
-                w_values: FractalTensor[Tensor['1, 64', float, 'cuda']],
-                r_values: FractalTensor[Tensor['1, 64', float, 'cuda']]
-                ) -> Tensor['1, 64', float, 'cuda']:
+def sparse_attn(
+    query_token: Tensor['1, 64', float,
+                        'cuda'], w_keys: FractalTensor[Tensor['1, 64', float,
+                                                              'cuda']],
+    r_keys: FractalTensor[Tensor['1, 64', float, 'cuda']],
+    w_values: FractalTensor[Tensor['1, 64', float, 'cuda']],
+    r_values: FractalTensor[Tensor['1, 64', float, 'cuda']]
+) -> Tensor['1, 64', float, 'cuda']:
     ks = ops.flatten(w_keys.join(r_keys)).T
     vs = ops.flatten(w_values.join(r_values))
 
@@ -37,15 +38,19 @@ def sparse_attn(query_token: Tensor['1, 64', float, 'cuda'],
 
 
 # @kaleido.function(ctx)
-def per_head_attn(query: FractalTensor[Tensor['1, 64', float, 'cuda']],
-                  key: FractalTensor[Tensor['1, 64', float, 'cuda']],
-                  value: FractalTensor[Tensor['1, 64', float, 'cuda']],
-                  random_attn_pos: FractalTensor[Tensor['1, 3', float, 'cuda']]
-                  ) -> FractalTensor[Tensor['1, 64', float, 'cuda']]:
+def per_head_attn(
+    query: FractalTensor[Tensor['1, 64', float, 'cuda']],
+    key: FractalTensor[Tensor['1, 64', float,
+                              'cuda']], value: FractalTensor[Tensor['1, 64',
+                                                                    float,
+                                                                    'cuda']],
+    random_attn_pos: FractalTensor[Tensor['1, 3', float, 'cuda']]
+) -> FractalTensor[Tensor['1, 64', float, 'cuda']]:
     assert query.length == key.length == value.length
 
-    windowed_key, windowed_value = ops.shifted_slide(
-        ops.zip(key, value), window_size=5, dilation=2)
+    windowed_key, windowed_value = ops.shifted_slide(ops.zip(key, value),
+                                                     window_size=5,
+                                                     dilation=2)
     random_key, random_value = ops.map(lambda ids: (key[ids], value[ids]),
                                        random_attn_pos)
 
@@ -72,12 +77,14 @@ def per_head_attn(query: FractalTensor[Tensor['1, 64', float, 'cuda']],
 
 # @kaleido.function(ctx)
 def multihead_sparse_attention(
-        queries: FractalTensor[Tensor['1, 1024', float, 'cuda']],
-        keys: FractalTensor[Tensor['1, 1024', float, 'cuda']],
-        values: FractalTensor[Tensor['1, 1024', float, 'cuda']],
-        params: AttnParams, random_attn: FractalTensor[FractalTensor[
-            FractalTensor[Tensor['1, 3', int, 'cuda']]]]) -> FractalTensor[
-                FractalTensor[FractalTensor[Tensor['1, 64', float, 'cuda']]]]:
+    queries: FractalTensor[Tensor['1, 1024', float, 'cuda']],
+    keys: FractalTensor[Tensor['1, 1024', float, 'cuda']],
+    values: FractalTensor[Tensor['1, 1024', float,
+                                 'cuda']], params: AttnParams,
+    random_attn: FractalTensor[FractalTensor[FractalTensor[Tensor['1, 3', int,
+                                                                  'cuda']]]]
+) -> FractalTensor[FractalTensor[FractalTensor[Tensor['1, 64', float,
+                                                      'cuda']]]]:
     # query_proj is a depth-3 FractalTensor.
     # depth-1: batch_size, depth 2: num_heads, depth 3: sequence_length
     # leaf node: row vectors with a size of [1, hidden_size // num_heads]

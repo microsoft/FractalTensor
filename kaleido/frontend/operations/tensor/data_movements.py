@@ -3,17 +3,15 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 from typing import Tuple
 
 import torch
 
 import kaleido
-from kaleido.frontend.operations.base import Access
 from kaleido import Tensor
+from kaleido.frontend.operations.base import Access
 
 __all__ = [
     'cat',
@@ -23,6 +21,7 @@ __all__ = [
 
 
 class Cat(Access):
+
     def __call__(self, xs: Tuple, dim: int = 0):
 
         assert (len(xs))
@@ -37,6 +36,7 @@ cat = Cat()
 
 
 class Permute(Access):
+
     def __call__(self, x: Tensor, axes: Tuple[int]) -> Tensor:
         assert len(axes) == x.ndim
         shape = [x.shape[i] for i in axes]
@@ -52,6 +52,7 @@ permute = Permute()
 
 
 class Stack(Access):
+
     def __call__(self, xs: Tuple, dim: int = 0):
 
         assert (len(xs))

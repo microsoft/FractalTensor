@@ -22,10 +22,10 @@ namespace core {
 namespace cuda_kernel {
 
 enum class TileLayout {
-    RowMajor = 0,
-    ColumnMajor = 1,
-    SwizzledRowMajor = 2,  // shared memory layout
-    SwizzledColumnMajor = 3
+  RowMajor = 0,
+  ColumnMajor = 1,
+  SwizzledRowMajor = 2,  // shared memory layout
+  SwizzledColumnMajor = 3
 };
 
 }  // namespace cuda_kernel

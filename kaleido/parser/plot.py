@@ -9,15 +9,13 @@ __all__ = [
 from graphviz import Digraph
 
 import kaleido
-
-from kaleido.frontend.types import StorageInfoTree
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import FractalTensorStorage
-from kaleido.parser.ir_nodes import BlockNode
-from kaleido.parser.ir_nodes import ParallelNode
+from kaleido.frontend.types import (FractalTensorStorage, StorageInfoTree,
+                                    TensorStorage)
+from kaleido.parser.ir_nodes import BlockNode, ParallelNode
 
 
 class PlotProgram(object):
+
     def __init__(self, graph_name='example'):
         self.g = Digraph(graph_name)
         self.count = 0  # generate internal name
@@ -42,12 +40,11 @@ class PlotProgram(object):
         for x in root.input_ports:
             type_label = self.str_type_info(root.input_ports[x])
             type_name = self._gen_name()
-            graph.node(
-                type_name,
-                type_label,
-                shape='rect',
-                style='filled',
-                fontsize='8')
+            graph.node(type_name,
+                       type_label,
+                       shape='rect',
+                       style='filled',
+                       fontsize='8')
             graph.edge(type_name, root.name, label=x, fontsize='9')
 
     def plot_block_in_edges(self, root, graph):
@@ -64,19 +61,17 @@ class PlotProgram(object):
                 if tail.port.endswith('@bodyin'):
                     # The BlockNode is a ParallelNode, access function is
                     # attached to the in_edge.
-                    graph.edge(
-                        tail.node,
-                        tip.node,
-                        fontsize='8',
-                        label='{}\n{}'.format(tail.port, type_label),
-                        color='firebrick',
-                        style='dotted')
+                    graph.edge(tail.node,
+                               tip.node,
+                               fontsize='8',
+                               label='{}\n{}'.format(tail.port, type_label),
+                               color='firebrick',
+                               style='dotted')
                 else:
-                    graph.edge(
-                        tail.node,
-                        tip.node,
-                        fontsize='8',
-                        label='{}\n{}'.format(tail.port, type_label))
+                    graph.edge(tail.node,
+                               tip.node,
+                               fontsize='8',
+                               label='{}\n{}'.format(tail.port, type_label))
         if root.depth == 0:
             # the entire program is a function, plots the inputs to
             # of the program.
@@ -106,38 +101,34 @@ class PlotProgram(object):
                     color = 'deepskyblue'
                     style = 'dotted'
 
-                graph.node(
-                    type_name,
-                    type_label,
-                    shape='rect',
-                    style='filled',
-                    fontsize='8',
-                    fillcolor='lightskyblue2')
-                graph.edge(
-                    tail.node,
-                    type_name,
-                    fontsize='8',
-                    label=label,
-                    style=style,
-                    color=color)
+                graph.node(type_name,
+                           type_label,
+                           shape='rect',
+                           style='filled',
+                           fontsize='8',
+                           fillcolor='lightskyblue2')
+                graph.edge(tail.node,
+                           type_name,
+                           fontsize='8',
+                           label=label,
+                           style=style,
+                           color=color)
 
     def plot_block_edges(self, root, graph):
         for tail in root.edges:
             for tip in root.edges[tail]:
                 type_label = root.get_storage_info_over_edge(tail, tip)
                 if tail.port.endswith('@state'):
-                    graph.edge(
-                        tail.node,
-                        tip.node,
-                        fontsize='8',
-                        color='darkorange',
-                        label='{}\n{}'.format(tail.port, type_label))
+                    graph.edge(tail.node,
+                               tip.node,
+                               fontsize='8',
+                               color='darkorange',
+                               label='{}\n{}'.format(tail.port, type_label))
                 else:
-                    graph.edge(
-                        tail.node,
-                        tip.node,
-                        fontsize='8',
-                        label='{}\n{}'.format(tail.port, type_label))
+                    graph.edge(tail.node,
+                               tip.node,
+                               fontsize='8',
+                               label='{}\n{}'.format(tail.port, type_label))
 
     def plot_a_level(self, root, graph):
         # 1. plot nodes in the BlockNode.
@@ -146,12 +137,11 @@ class PlotProgram(object):
             label = '{}\n{}, depth={}'.format(node.name, node.opcode,
                                               node.depth)
             if isinstance(node, BlockNode):
-                graph.node(
-                    node.name,
-                    label,
-                    style='filled',
-                    color='darkseagreen',
-                    fontsize='10')
+                graph.node(node.name,
+                           label,
+                           style='filled',
+                           color='darkseagreen',
+                           fontsize='10')
             else:
                 graph.node(node.name, label, fontsize='10')
 
@@ -169,13 +159,12 @@ class PlotProgram(object):
 
     def plot(self, root: BlockNode):
         label = '{}\n{}, depth={}'.format(root.name, root.opcode, root.depth)
-        self.g.node(
-            root.name,
-            label,
-            shape='doubleoctagon',
-            style='filled',
-            fillcolor='lightsteelblue',
-            fontsize='12')
+        self.g.node(root.name,
+                    label,
+                    shape='doubleoctagon',
+                    style='filled',
+                    fillcolor='lightsteelblue',
+                    fontsize='12')
 
         self.plot_a_level(root, self.g)
         self.g.render()

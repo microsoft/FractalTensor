@@ -5,12 +5,12 @@
 
 from __future__ import print_function
 
-from context import *
-
 import torch
+from context import *
 
 
 class TestJoin(unittest.TestCase):
+
     def create_depth1_fractaltensor(self, length, device='cpu'):
         shape = [3, 7]
         xs = kaleido.FractalTensor(

@@ -3,32 +3,33 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import Tuple
-from typing import List
+from typing import List, Tuple
 
-import torch.jit as jit
 import torch
+import torch.jit as jit
 import torch.nn as nn
+from torch import Tensor
 from torch.nn import Parameter
 from torch.nn.init import xavier_normal_ as init
-from torch import Tensor
 
 __all__ = [
     'small_model',
 ]
 
-import torch
-from torch import nn
-from torch import Tensor
 from typing import Tuple
+
+import torch
+from torch import Tensor, nn
 
 
 def init(param):
-    return nn.init.kaiming_normal_(
-        param, mode='fan_out', nonlinearity='sigmoid')
+    return nn.init.kaiming_normal_(param,
+                                   mode='fan_out',
+                                   nonlinearity='sigmoid')
 
 
 class FineGrainedOpLSTMCell_v1(nn.Module):
+
     def __init__(self, input_size: int, hidden_size: int, dtype=torch.float16):
         super(FineGrainedOpLSTMCell_v1, self).__init__()
         # learnable parameters for input gate.
@@ -74,17 +75,18 @@ class FineGrainedOpLSTMCell_v1(nn.Module):
 
 
 class FineGrainedOpLSTMCell_v2(nn.Module):
+
     def __init__(self, input_size: int, hidden_size: int, dtype=torch.float16):
         super(FineGrainedOpLSTMCell_v2, self).__init__()
         # learnable parameters for four gates.
         self.W = nn.Parameter(
             init(
-                torch.zeros(
-                    (input_size, hidden_size * 4), dtype=torch.float16)))
+                torch.zeros((input_size, hidden_size * 4),
+                            dtype=torch.float16)))
         self.U = nn.Parameter(
             init(
-                torch.zeros(
-                    (hidden_size, hidden_size * 4), dtype=torch.float16)))
+                torch.zeros((hidden_size, hidden_size * 4),
+                            dtype=torch.float16)))
         self.b = nn.Parameter(torch.ones(hidden_size * 4, dtype=torch.float16))
 
         self.hidden_size = hidden_size
@@ -107,6 +109,7 @@ class FineGrainedOpLSTMCell_v2(nn.Module):
 
 
 class CuDNNLSTM(nn.Module):
+
     def __init__(self, hidden_size: int, num_layers: int, dtype):
         super(CuDNNLSTM, self).__init__()
 
@@ -159,14 +162,12 @@ class StackedLSTM(nn.Module):
 
         if cell_type == 'v1':
             self.cells = nn.ModuleList([
-                FineGrainedOpLSTMCell_v1(
-                    hidden_size, hidden_size, dtype=dtype)
+                FineGrainedOpLSTMCell_v1(hidden_size, hidden_size, dtype=dtype)
                 for i in range(num_layers)
             ])
         elif cell_type == 'v2':
             self.cells = nn.ModuleList([
-                FineGrainedOpLSTMCell_v2(
-                    hidden_size, hidden_size, dtype=dtype)
+                FineGrainedOpLSTMCell_v2(hidden_size, hidden_size, dtype=dtype)
                 for i in range(num_layers)
             ])
         else:
@@ -217,15 +218,15 @@ def small_model(cell_type,
                 dtype,
                 states=False):
     if cell_type == 'cudnn_lstm':
-        return CuDNNLSTM(
-            hidden_size=hidden_size, num_layers=num_layers, dtype=dtype)
+        return CuDNNLSTM(hidden_size=hidden_size,
+                         num_layers=num_layers,
+                         dtype=dtype)
     elif cell_type == 'script_lstm':
         return ScriptLSTM(hidden_size, hidden_size, num_layers, states)
     else:
-        return StackedLSTM(
-            batch_size=batch_size,
-            cell_type=cell_type,
-            max_seq_length=max_seq_length,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            dtype=dtype)
+        return StackedLSTM(batch_size=batch_size,
+                           cell_type=cell_type,
+                           max_seq_length=max_seq_length,
+                           hidden_size=hidden_size,
+                           num_layers=num_layers,
+                           dtype=dtype)

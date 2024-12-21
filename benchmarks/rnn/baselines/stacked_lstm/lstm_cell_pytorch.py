@@ -4,14 +4,14 @@
 # --------------------------------------------------------------------------
 
 import os
-from time import time
-from collections import namedtuple
 import sys
-
-import torch
-from torch.profiler import profiler, record_function, ProfilerActivity
+from collections import namedtuple
+from time import time
 
 import pt_model as model
+import torch
+from torch.profiler import ProfilerActivity, profiler, record_function
+
 torch.manual_seed(1234)
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -31,12 +31,11 @@ def run_lstm_cell_pytorch_cudnn(batch_size, seq_len, hidden, depth, cell_type):
 
     x = torch.randn(*input_shape, device=device)
 
-    m = model.small_model(
-        batch_size=batch_size,
-        cell_type=cell_type,
-        max_seq_length=seq_len,
-        hidden_size=hidden,
-        num_layers=depth).to(device)
+    m = model.small_model(batch_size=batch_size,
+                          cell_type=cell_type,
+                          max_seq_length=seq_len,
+                          hidden_size=hidden,
+                          num_layers=depth).to(device)
     m = torch.jit.script(m)
     m.eval()
 
@@ -61,12 +60,11 @@ def run_lstm_cell_pytorch_cudnn_profiler(batch_size, seq_len, hidden, depth,
     device = 'cuda:0'
 
     x = torch.randn(*input_shape, device=device)
-    m = model.small_model(
-        batch_size=batch_size,
-        cell_type=cell_type,
-        max_seq_length=seq_len,
-        hidden_size=hidden,
-        num_layers=depth).to(device)
+    m = model.small_model(batch_size=batch_size,
+                          cell_type=cell_type,
+                          max_seq_length=seq_len,
+                          hidden_size=hidden,
+                          num_layers=depth).to(device)
     m = torch.jit.script(m)
     m.eval()
 
@@ -113,8 +111,9 @@ if __name__ == '__main__':
         )
         for hidden_size in hidden_sizes:
             for batch_size in batch_sizes:
-                t = run_lstm_cell_pytorch_cudnn(
-                    batch_size, seq_length, hidden_size, depth, 'cudnn_lstm')
+                t = run_lstm_cell_pytorch_cudnn(batch_size, seq_length,
+                                                hidden_size, depth,
+                                                'cudnn_lstm')
                 f.write('[%d, %d, %d, %d]\t%s\t%.5f\n' %
                         (depth, seq_length, batch_size, hidden_size, 'CuDNN',
                          t * 1000))

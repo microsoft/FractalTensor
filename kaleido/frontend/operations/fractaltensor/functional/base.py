@@ -5,23 +5,16 @@
 """Looping patterns with explicit access patterns and data dependence information.
 Follows iterative protocol."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from typing import List
-from typing import Tuple
-from typing import Union
-from typing import Callable
-from typing import TypeVar
+from typing import Callable, List, Tuple, TypeVar, Union
 
 import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido import Iterative
+from kaleido import FractalTensor, Iterative, Tensor
 
 
 class Functional(object):
+
     def _check_iterative(self, xs):
         """check whether xs is iterative."""
 

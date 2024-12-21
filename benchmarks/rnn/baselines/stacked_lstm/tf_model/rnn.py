@@ -3,18 +3,18 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from typing import List
 import math
+from typing import List
+
 import tensorflow as tf
 
 layers = tf.keras.layers
 
 
 class FineGrainedOpLstmCellV1(layers.Layer):
+
     def __init__(self, input_size, hidden_size):
         super(FineGrainedOpLstmCellV1, self).__init__()
 
@@ -24,60 +24,56 @@ class FineGrainedOpLstmCellV1(layers.Layer):
     def build(self, input_shape):
         stddev = 1.0 / math.sqrt(self.hidden_size)
         self.igx = tf.Variable(
-            tf.random.uniform(
-                [self.input_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.input_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.igu = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.hidden_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.ib = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size], minval=-stddev, maxval=stddev))
+            tf.random.uniform([self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
 
         self.fgx = tf.Variable(
-            tf.random.uniform(
-                [self.input_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.input_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.fgu = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.hidden_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.fb = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size], minval=-stddev, maxval=stddev))
+            tf.random.uniform([self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
 
         self.ogx = tf.Variable(
-            tf.random.uniform(
-                [self.input_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.input_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.ogu = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.hidden_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.ob = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size], minval=-stddev, maxval=stddev))
+            tf.random.uniform([self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
 
         self.cgx = tf.Variable(
-            tf.random.uniform(
-                [self.input_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.input_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.cgu = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.hidden_size, self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
         self.cb = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size], minval=-stddev, maxval=stddev))
+            tf.random.uniform([self.hidden_size],
+                              minval=-stddev,
+                              maxval=stddev))
 
     # uncomment the following line to enable auto-graph.
     # @tf.function
@@ -93,6 +89,7 @@ class FineGrainedOpLstmCellV1(layers.Layer):
 
 
 class FineGrainedOpLstmCellV2(layers.Layer):
+
     def __init__(self, input_size, hidden_size):
         super(FineGrainedOpLstmCellV2, self).__init__()
         self.input_size = input_size
@@ -101,18 +98,17 @@ class FineGrainedOpLstmCellV2(layers.Layer):
     def build(self, input_shape):
         stddev = 1.0 / math.sqrt(self.hidden_size)
         self.w = tf.Variable(
-            tf.random.uniform(
-                [self.input_size, self.hidden_size * 4],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.input_size, self.hidden_size * 4],
+                              minval=-stddev,
+                              maxval=stddev))
         self.u = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size, self.hidden_size * 4],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.hidden_size, self.hidden_size * 4],
+                              minval=-stddev,
+                              maxval=stddev))
         self.b = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size * 4], minval=-stddev, maxval=stddev))
+            tf.random.uniform([self.hidden_size * 4],
+                              minval=-stddev,
+                              maxval=stddev))
 
     # uncomment the following line to enable auto-graph.
     # @tf.function
@@ -133,6 +129,7 @@ class FineGrainedOpLstmCellV2(layers.Layer):
 
 
 class FineGrainedOpLstmNet(tf.keras.Model):
+
     def __init__(self, input_size, hidden_size, num_layers, cell_type):
         super(FineGrainedOpLstmNet, self).__init__()
         self.hidden_size = hidden_size
@@ -157,8 +154,9 @@ class FineGrainedOpLstmNet(tf.keras.Model):
 
         for rnncell in self.cells:  # iterate over depth
             outputs = []
-            input_seq = tf.unstack(
-                input_seq, num=int(input_seq.shape[0]), axis=0)
+            input_seq = tf.unstack(input_seq,
+                                   num=int(input_seq.shape[0]),
+                                   axis=0)
             h = tf.zeros((batch_size, self.hidden_size))
             c = tf.zeros((batch_size, self.hidden_size))
             for inp in input_seq:  # iterate over time step
@@ -190,19 +188,18 @@ class WhileOpLstmLayer(tf.keras.Model):
         stddev = 1.0 / math.sqrt(self.hidden_size)
 
         self.w = tf.Variable(
-            tf.random.uniform(
-                [self.input_size, self.hidden_size * 4],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.input_size, self.hidden_size * 4],
+                              minval=-stddev,
+                              maxval=stddev))
 
         self.u = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size, self.hidden_size * 4],
-                minval=-stddev,
-                maxval=stddev))
+            tf.random.uniform([self.hidden_size, self.hidden_size * 4],
+                              minval=-stddev,
+                              maxval=stddev))
         self.bias = tf.Variable(
-            tf.random.uniform(
-                [self.hidden_size * 4], minval=-stddev, maxval=stddev))
+            tf.random.uniform([self.hidden_size * 4],
+                              minval=-stddev,
+                              maxval=stddev))
 
     def _while_op_lstm(self, input):
         shape = tf.shape(input)
@@ -236,13 +233,14 @@ class WhileOpLstmLayer(tf.keras.Model):
         init_c = tf.zeros([batch_size, self.hidden_size])
 
         init_t = tf.constant(0)
-        output_array = tf.TensorArray(
-            dtype=tf.float32, size=seq_len, dynamic_size=False)
+        output_array = tf.TensorArray(dtype=tf.float32,
+                                      size=seq_len,
+                                      dynamic_size=False)
         cond = lambda i, _: tf.less(i, seq_len)
-        _, step = tf.while_loop(
-            cond=cond,
-            body=body,
-            loop_vars=(init_t, (init_h, init_c, output_array)))
+        _, step = tf.while_loop(cond=cond,
+                                body=body,
+                                loop_vars=(init_t, (init_h, init_c,
+                                                    output_array)))
         _, _, output_array = step
 
         return output_array.stack()
@@ -257,14 +255,14 @@ class WhileOpLstmLayer(tf.keras.Model):
 
 
 class WhileOpLstmNet(tf.keras.Model):
+
     def __init__(self, input_size, hidden_size, num_layers):
         super(WhileOpLstmNet, self).__init__()
         self.hidden_size = hidden_size
 
         self.rnns = [
-            WhileOpLstmLayer(input_size
-                             if i == 0 else hidden_size, hidden_size)
-            for i in range(num_layers)
+            WhileOpLstmLayer(input_size if i == 0 else hidden_size,
+                             hidden_size) for i in range(num_layers)
         ]
 
     def call(self, input_seq):
@@ -290,8 +288,9 @@ class StaticRNN(tf.keras.Model):
 
         if use_cudnn_rnn:
             self.cells = [
-                tf.compat.v1.keras.layers.CuDNNLSTM(
-                    hidden_size, return_state=True, return_sequences=True)
+                tf.compat.v1.keras.layers.CuDNNLSTM(hidden_size,
+                                                    return_state=True,
+                                                    return_sequences=True)
                 for _ in range(num_layers)
             ]
         else:
@@ -302,18 +301,17 @@ class StaticRNN(tf.keras.Model):
             # performance profiles on different hardware and for different
             # applications.
             self.cells = [
-                layers.LSTMCell(
-                    units=hidden_size,
-                    activation='tanh',
-                    recurrent_activation='sigmoid',
-                    use_bias=True,
-                    kernel_initializer='glorot_uniform',
-                    recurrent_initializer='orthogonal',
-                    bias_initializer='zeros',
-                    unit_forget_bias=True,
-                    dropout=0.0,
-                    recurrent_dropout=0.0,
-                    implementation=2) for _ in range(num_layers)
+                layers.LSTMCell(units=hidden_size,
+                                activation='tanh',
+                                recurrent_activation='sigmoid',
+                                use_bias=True,
+                                kernel_initializer='glorot_uniform',
+                                recurrent_initializer='orthogonal',
+                                bias_initializer='zeros',
+                                unit_forget_bias=True,
+                                dropout=0.0,
+                                recurrent_dropout=0.0,
+                                implementation=2) for _ in range(num_layers)
             ]
 
         self.hidden_size = hidden_size
@@ -347,8 +345,9 @@ class StaticRNN(tf.keras.Model):
 
             # unpack the input 3D tensors along the `max_sequence_length` axis
             # to get input tensors for each time step.
-            input_seq = tf.unstack(
-                input_seq, num=int(input_seq.shape[0]), axis=0)
+            input_seq = tf.unstack(input_seq,
+                                   num=int(input_seq.shape[0]),
+                                   axis=0)
             outputs = []
             for inp in input_seq:  # iterate over time step
                 output, state = cell(inp, state)

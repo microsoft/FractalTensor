@@ -3,18 +3,17 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import torch
-import torch.nn as nn
-from torch.nn import Parameter
-from torch.nn.init import xavier_normal_ as init
-from torch import Tensor
-
-import triton
-import triton.language as tl
-
+import os
 from time import time
 
-import os
+import torch
+import torch.nn as nn
+import triton
+import triton.language as tl
+from torch import Tensor
+from torch.nn import Parameter
+from torch.nn.init import xavier_normal_ as init
+
 __all__ = ['LSTMscan']
 
 
@@ -217,33 +216,33 @@ __all__ = ['LSTMscan']
 )
 @triton.jit
 def LSTMscan_kernel(
-        Wi_ptr,
-        Ui_ptr,
-        bi_ptr,
-        Wf_ptr,
-        Uf_ptr,
-        bf_ptr,
-        Wo_ptr,
-        Uo_ptr,
-        bo_ptr,
-        Wg_ptr,
-        Ug_ptr,
-        bg_ptr,
-        h_prev_ptr,
-        c_prev_ptr,
-        input_ptr,
-        h_ptr,
-        c_ptr,
-        input_size,
-        hidden_size,
-        batch_size,
-        stride_hm,
-        stride_hk,
-        stride_wk,
-        stride_wn,
-        BLOCK_SIZE_B: tl.constexpr,
-        BLOCK_SIZE_H: tl.constexpr,
-        BLOCK_SIZE_K: tl.constexpr,
+    Wi_ptr,
+    Ui_ptr,
+    bi_ptr,
+    Wf_ptr,
+    Uf_ptr,
+    bf_ptr,
+    Wo_ptr,
+    Uo_ptr,
+    bo_ptr,
+    Wg_ptr,
+    Ug_ptr,
+    bg_ptr,
+    h_prev_ptr,
+    c_prev_ptr,
+    input_ptr,
+    h_ptr,
+    c_ptr,
+    input_size,
+    hidden_size,
+    batch_size,
+    stride_hm,
+    stride_hk,
+    stride_wk,
+    stride_wn,
+    BLOCK_SIZE_B: tl.constexpr,
+    BLOCK_SIZE_H: tl.constexpr,
+    BLOCK_SIZE_K: tl.constexpr,
 ):
     pid_m = tl.program_id(0)
     pid_h = tl.program_id(1)
@@ -336,10 +335,10 @@ def LSTMscan_kernel(
         block_shape=(BLOCK_SIZE_B, BLOCK_SIZE_H),
         order=(1, 0),
     )
-    offset_batch = (
-        pid_m * BLOCK_SIZE_B + tl.arange(0, BLOCK_SIZE_B)) % batch_size
-    offset_hidden = (
-        pid_h * BLOCK_SIZE_H + tl.arange(0, BLOCK_SIZE_H)) % hidden_size
+    offset_batch = (pid_m * BLOCK_SIZE_B +
+                    tl.arange(0, BLOCK_SIZE_B)) % batch_size
+    offset_hidden = (pid_h * BLOCK_SIZE_H +
+                     tl.arange(0, BLOCK_SIZE_H)) % hidden_size
     bi_ptrs = bi_ptr + offset_hidden[None, :]
     bf_ptrs = bf_ptr + offset_hidden[None, :]
     bo_ptrs = bo_ptr + offset_hidden[None, :]
@@ -444,29 +443,28 @@ def LSTMscan(input_,
             triton.cdiv(hidden_size, META['BLOCK_SIZE_H']),
         )
 
-    LSTMscan_kernel[grid](
-        Wi_ptr=Wi,
-        Ui_ptr=Ui,
-        bi_ptr=bi,
-        Wf_ptr=Wf,
-        Uf_ptr=Uf,
-        bf_ptr=bf,
-        Wo_ptr=Wo,
-        Uo_ptr=Uo,
-        bo_ptr=bo,
-        Wg_ptr=Wg,
-        Ug_ptr=Ug,
-        bg_ptr=bg,
-        h_prev_ptr=h_prew,
-        c_prev_ptr=c_prew,
-        input_ptr=input_,
-        h_ptr=h_resident,
-        c_ptr=c_resident,
-        input_size=input_size,
-        hidden_size=hidden_size,
-        batch_size=batch_size,
-        stride_hm=h_resident.stride(0),
-        stride_hk=h_resident.stride(1),
-        stride_wk=Wi.stride(0),
-        stride_wn=Wi.stride(1))
+    LSTMscan_kernel[grid](Wi_ptr=Wi,
+                          Ui_ptr=Ui,
+                          bi_ptr=bi,
+                          Wf_ptr=Wf,
+                          Uf_ptr=Uf,
+                          bf_ptr=bf,
+                          Wo_ptr=Wo,
+                          Uo_ptr=Uo,
+                          bo_ptr=bo,
+                          Wg_ptr=Wg,
+                          Ug_ptr=Ug,
+                          bg_ptr=bg,
+                          h_prev_ptr=h_prew,
+                          c_prev_ptr=c_prew,
+                          input_ptr=input_,
+                          h_ptr=h_resident,
+                          c_ptr=c_resident,
+                          input_size=input_size,
+                          hidden_size=hidden_size,
+                          batch_size=batch_size,
+                          stride_hm=h_resident.stride(0),
+                          stride_hk=h_resident.stride(1),
+                          stride_wk=Wi.stride(0),
+                          stride_wn=Wi.stride(1))
     return h_resident, c_resident

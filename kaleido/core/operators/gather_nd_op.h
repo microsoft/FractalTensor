@@ -8,9 +8,9 @@ namespace ops {
 
 template <typename DeviceContext, typename Place, typename T>
 class GatherNdOp {
-   public:
-    void operator()(const DeviceContext& context, Tensor& output,
-                    const Tensor& input, const Tensor& indices);
+public:
+  void operator()(const DeviceContext& context, Tensor& output,
+                  const Tensor& input, const Tensor& indices);
 };
 
 }  // namespace ops

@@ -3,9 +3,7 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 __all__ = [
     'reshape',
@@ -13,16 +11,16 @@ __all__ = [
     'unsqueeze',
 ]
 
-import torch
+from typing import List, Union
 
-from typing import Union
-from typing import List
+import torch
 
 import kaleido
 from kaleido.frontend.operations.base import BaseOp
 
 
 class Reshape(BaseOp):
+
     def __call__(self, x: kaleido.Tensor, shape: Union[List[int], int]):
         if not isinstance(shape, List):
             if isinstance(shape, int):
@@ -43,6 +41,7 @@ reshape = Reshape()
 
 
 class Squeeze(BaseOp):
+
     def __call__(self, x: kaleido.Tensor, dim: int = None):
         super(Squeeze, self).__call__(x)
 
@@ -57,6 +56,7 @@ squeeze = Squeeze()
 
 
 class Unsqueeze(BaseOp):
+
     def __call__(self, x: kaleido.Tensor, dim: int):
         super(Unsqueeze, self).__call__(x)
 

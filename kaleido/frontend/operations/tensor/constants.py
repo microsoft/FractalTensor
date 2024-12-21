@@ -4,16 +4,15 @@
 # --------------------------------------------------------------------------
 """Operations that create constant values."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 from typing import Tuple
+
 import torch
 
 import kaleido
-from kaleido.frontend.types import internal_type_to_torch_type
-from kaleido.frontend.types import str_to_internal_type
+from kaleido.frontend.types import (internal_type_to_torch_type,
+                                    str_to_internal_type)
 
 __all__ = [
     'zeros',
@@ -29,6 +28,7 @@ class ConstantOp(object):
 
 
 class Zeros(ConstantOp):
+
     def __call__(self,
                  shape: Tuple[int] = None,
                  dtype: str = 'float',
@@ -38,12 +38,12 @@ class Zeros(ConstantOp):
 
         elem_type = str_to_internal_type(dtype)
 
-        t = kaleido.Tensor(
-            shape, dtype=elem_type, device='cpu' if device is None else device)
-        t.data = torch.zeros(
-            *shape,
-            dtype=internal_type_to_torch_type(elem_type),
-            device=device)
+        t = kaleido.Tensor(shape,
+                           dtype=elem_type,
+                           device='cpu' if device is None else device)
+        t.data = torch.zeros(*shape,
+                             dtype=internal_type_to_torch_type(elem_type),
+                             device=device)
         return t
 
 
@@ -51,6 +51,7 @@ zeros = Zeros()
 
 
 class Ones(ConstantOp):
+
     def __call__(self,
                  shape: Tuple[int] = None,
                  dtype: str = 'float',
@@ -60,12 +61,12 @@ class Ones(ConstantOp):
 
         elem_type = str_to_internal_type(dtype)
 
-        t = kaleido.Tensor(
-            shape, dtype=elem_type, device='cpu' if device is None else device)
-        t.data = torch.ones(
-            *shape,
-            dtype=internal_type_to_torch_type(elem_type),
-            device=device)
+        t = kaleido.Tensor(shape,
+                           dtype=elem_type,
+                           device='cpu' if device is None else device)
+        t.data = torch.ones(*shape,
+                            dtype=internal_type_to_torch_type(elem_type),
+                            device=device)
         return t
 
 
@@ -73,7 +74,10 @@ ones = Ones()
 
 
 class Arange(ConstantOp):
-    def __call__(self, *args, dtype=kaleido.int32,
+
+    def __call__(self,
+                 *args,
+                 dtype=kaleido.int32,
                  device='cpu') -> kaleido.Tensor:
         """Return evenly spaced values within a given interval.
 
@@ -102,14 +106,14 @@ class Arange(ConstantOp):
             raise ValueError('stop should be larger than start.')
 
         l = (stop - start) // step
-        t = kaleido.Tensor(
-            (l, ), dtype=dtype, device='cpu' if device is None else device)
-        t.data = torch.arange(
-            start,
-            stop,
-            step,
-            dtype=internal_type_to_torch_type(dtype),
-            device=device)
+        t = kaleido.Tensor((l, ),
+                           dtype=dtype,
+                           device='cpu' if device is None else device)
+        t.data = torch.arange(start,
+                              stop,
+                              step,
+                              dtype=internal_type_to_torch_type(dtype),
+                              device=device)
         return t
 
 
@@ -117,6 +121,7 @@ arange = Arange()
 
 
 class Random(ConstantOp):
+
     def __call__(self,
                  shape: Tuple[int] = None,
                  dtype=kaleido.float32,
@@ -124,10 +129,12 @@ class Random(ConstantOp):
         if not shape:
             raise ValueError('shape is not given.')
 
-        t = kaleido.Tensor(
-            shape, dtype=dtype, device='cpu' if device is None else device)
-        t.data = torch.rand(
-            *shape, dtype=internal_type_to_torch_type(dtype), device=device)
+        t = kaleido.Tensor(shape,
+                           dtype=dtype,
+                           device='cpu' if device is None else device)
+        t.data = torch.rand(*shape,
+                            dtype=internal_type_to_torch_type(dtype),
+                            device=device)
         return t
 
 
@@ -147,13 +154,13 @@ class Full(ConstantOp):
         if not shape:
             raise ValueError('shape is not given.')
 
-        t = kaleido.Tensor(
-            shape, dtype=dtype, device='cpu' if device is None else device)
-        t.data = torch.full(
-            shape,
-            fill_value=fill_value,
-            dtype=internal_type_to_torch_type(dtype),
-            device=device)
+        t = kaleido.Tensor(shape,
+                           dtype=dtype,
+                           device='cpu' if device is None else device)
+        t.data = torch.full(shape,
+                            fill_value=fill_value,
+                            dtype=internal_type_to_torch_type(dtype),
+                            device=device)
 
         return t
 

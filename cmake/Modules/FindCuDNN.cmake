@@ -2,33 +2,24 @@
 # Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
 # MIT License.
 # --------------------------------------------------------------------------
-
-# This module will set the following variables in your project::
-#
-# ``CUDNN_FOUND`` True if CUDNN found on the local system
-#
-# ``CUDNN_INCLUDE_DIRS`` Location of CUDNN header files.
-#
-# ``CUDNN_LIBRARIES`` The CUDNN libraries.
-#
-# ``CuDNN::CuDNN`` The CUDNN target
-
 include(FindPackageHandleStandardArgs)
 
 find_path(
   CUDNN_INCLUDE_DIR
-  NAMES cudnn.h cudnn_v8.h cudnn_v7.h
+  NAMES cudnn.h cudnn_v9.h cudnn_v8.h cudnn_v7.h
   HINTS $ENV{CUDA_PATH} $ENV{CUDA_TOOLKIT_ROOT_DIR} $ENV{cudnn} $ENV{CUDNN}
         $ENV{CUDNN_ROOT_DIR} /usr/include
   PATH_SUFFIXES cuda/include include)
 find_library(
   CUDNN_LIBRARY
-  NAMES cudnn cudnn8 cudnn7
+  NAMES cudnn cudnn9 cudnn8 cudnn7
   HINTS $ENV{CUDA_PATH} $ENV{CUDA_TOOLKIT_ROOT_DIR} $ENV{cudnn} $ENV{CUDNN}
         $ENV{CUDNN_ROOT_DIR} /usr/lib/x86_64-linux-gnu/
   PATH_SUFFIXES lib lib64 cuda/lib cuda/lib64 lib/x64 cuda/lib/x64)
 if(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn.h")
   file(READ ${CUDNN_INCLUDE_DIR}/cudnn.h CUDNN_HEADER_CONTENTS)
+elseif(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn_v9.h")
+  file(READ ${CUDNN_INCLUDE_DIR}/cudnn_v9.h CUDNN_HEADER_CONTENTS)
 elseif(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn_v8.h")
   file(READ ${CUDNN_INCLUDE_DIR}/cudnn_v8.h CUDNN_HEADER_CONTENTS)
 elseif(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn_v7.h")
@@ -36,6 +27,10 @@ elseif(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn_v7.h")
 endif()
 if(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn_version.h")
   file(READ "${CUDNN_INCLUDE_DIR}/cudnn_version.h" CUDNN_VERSION_H_CONTENTS)
+  string(APPEND CUDNN_HEADER_CONTENTS "${CUDNN_VERSION_H_CONTENTS}")
+  unset(CUDNN_VERSION_H_CONTENTS)
+elseif(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn_version_v9.h")
+  file(READ "${CUDNN_INCLUDE_DIR}/cudnn_version_v9.h" CUDNN_VERSION_H_CONTENTS)
   string(APPEND CUDNN_HEADER_CONTENTS "${CUDNN_VERSION_H_CONTENTS}")
   unset(CUDNN_VERSION_H_CONTENTS)
 elseif(EXISTS "${CUDNN_INCLUDE_DIR}/cudnn_version_v8.h")
@@ -76,14 +71,6 @@ mark_as_advanced(CUDNN_LIBRARY CUDNN_INCLUDE_DIR)
 find_package_handle_standard_args(CuDNN REQUIRED_VARS CUDNN_INCLUDE_DIR
                                   CUDNN_LIBRARY VERSION_VAR CUDNN_VERSION)
 
-if(WIN32)
-  set(CUDNN_DLL_DIR ${CUDNN_INCLUDE_DIR})
-  list(TRANSFORM CUDNN_DLL_DIR APPEND "/../bin")
-  find_file(
-    CUDNN_LIBRARY_DLL
-    NAMES cudnn64_${CUDNN_VERSION_MAJOR}.dll
-    PATHS ${CUDNN_DLL_DIR})
-endif()
 
 if(CUDNN_FOUND AND NOT TARGET CuDNN::CuDNN)
   if(EXISTS "${CUDNN_LIBRARY_DLL}")

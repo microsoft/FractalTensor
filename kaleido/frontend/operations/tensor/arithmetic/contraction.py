@@ -3,11 +3,10 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 from typing import Tuple
+
 import torch
 
 import kaleido
@@ -21,8 +20,8 @@ __all__ = [
 
 class MatMul(Contraction):
     """ (tensor contraction: reduce + map) matrix multiplication
-
-    y = a \otimes b
+    
+    y = a $\otimes$ b
     """
 
     def __call__(self, x: kaleido.Tensor, y: kaleido.Tensor) -> kaleido.Tensor:

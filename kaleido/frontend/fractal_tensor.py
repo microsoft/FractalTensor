@@ -3,25 +3,16 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-from typing import Union
-from typing import List
-from typing import Tuple
-from typing import TypeVar
-from typing import Generic
+from __future__ import absolute_import, division, print_function
 
 import copy
 from collections.abc import Sequence
+from typing import Generic, List, Tuple, TypeVar, Union
 
 import kaleido
 from kaleido.frontend.tensor import Tensor
-from kaleido.frontend.types import Number
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import FractalTensorStorage
-from kaleido.frontend.types import pytype_to_internal_type
+from kaleido.frontend.types import (FractalTensorStorage, Number,
+                                    TensorStorage, pytype_to_internal_type)
 
 __all__ = [
     'FractalTensor',
@@ -91,8 +82,8 @@ class FractalTensor(Sequence, Generic[T]):
        problem looking only for integer solutions.
     """
 
-    def __init__(self,
-                 dtype: Union[Number, TensorStorage, FractalTensorStorage]):
+    def __init__(self, dtype: Union[Number, TensorStorage,
+                                    FractalTensorStorage]):
         """
         Args:
             dtype, Union[Number, TensorStorage, FractalTensorStorage], the type of
@@ -505,6 +496,7 @@ class FractalTensor(Sequence, Generic[T]):
         ta._type = ta._type._dtype  # FIXME(ying), hotfix
 
         import torch  # TODO(ying): a hard-code to transform python list into a
+
         # PyTorch Tensor.
         if isinstance(x, List) and isinstance(x[0], int):
             ta.data = torch.LongTensor(
@@ -520,7 +512,9 @@ class FractalTensor(Sequence, Generic[T]):
 
 
 class Iterative(Sequence, Generic[T]):
+
     def __init__(self, *xs):
+
         def _check_input(x):
             #TODO(ying): Not implemented.
             return x

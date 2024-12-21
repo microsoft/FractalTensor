@@ -3,22 +3,21 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import Tuple
-from typing import List
+from time import time
+from typing import List, Tuple
 
-import torch.jit as jit
 import torch
+import torch.jit as jit
 import torch.nn as nn
+from torch import Tensor
 from torch.nn import Parameter
 from torch.nn.init import xavier_normal_ as init
-from torch import Tensor
-
-from time import time
 
 from .op import *
 
 
 class LSTMCell(nn.Module):
+
     def __init__(self,
                  input_size: int,
                  hidden_size: int,
@@ -31,37 +30,45 @@ class LSTMCell(nn.Module):
         self.size = (input_size, hidden_size, batch_size)
         self.Wi = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Wf = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Wo = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Wg = init(
             nn.Parameter(
-                torch.empty(
-                    [input_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([input_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
 
         self.Ui = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Uf = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Uo = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
         self.Ug = init(
             nn.Parameter(
-                torch.empty(
-                    [hidden_size, hidden_size], device=device, dtype=dtype)))
+                torch.empty([hidden_size, hidden_size],
+                            device=device,
+                            dtype=dtype)))
 
         self.bi = nn.Parameter(
             torch.ones([hidden_size], device=device, dtype=dtype))
@@ -84,6 +91,7 @@ class LSTMCell(nn.Module):
 
 
 class StackedDRNN(nn.Module):
+
     def __init__(self,
                  batch_size: int,
                  seq_len: int,
@@ -101,16 +109,14 @@ class StackedDRNN(nn.Module):
         self.hidden_size = hidden_size
         self.dilation = dilation
         self.h_resident = [
-            torch.empty(
-                [batch_size * dilation[i], hidden_size],
-                device=device,
-                dtype=dtype) for i in range(len(dilation))
+            torch.empty([batch_size * dilation[i], hidden_size],
+                        device=device,
+                        dtype=dtype) for i in range(len(dilation))
         ]
         self.c_resident = [
-            torch.empty(
-                [batch_size * dilation[i], hidden_size],
-                device=device,
-                dtype=dtype) for i in range(len(dilation))
+            torch.empty([batch_size * dilation[i], hidden_size],
+                        device=device,
+                        dtype=dtype) for i in range(len(dilation))
         ]
         self.cells = torch.nn.ModuleList([
             LSTMCell(input_size, hidden_size, batch_size * dilation[i], device,
@@ -120,28 +126,24 @@ class StackedDRNN(nn.Module):
     def _forward(self, iter, input_x, cell, rate):
 
         pad_num = (rate - (self.seq_len % rate)) % rate
-        padding_data = torch.zeros(
-            pad_num,
-            self.batch_size,
-            self.input_size,
-            device=self.device,
-            dtype=torch.float16)
+        padding_data = torch.zeros(pad_num,
+                                   self.batch_size,
+                                   self.input_size,
+                                   device=self.device,
+                                   dtype=torch.float16)
         input_x = torch.cat((input_x, padding_data))
 
-        dilated_input = torch.stack(
-            tuple(
-                map(lambda m: m.flatten(start_dim=0, end_dim=1),
-                    input_x.split(rate))),
-            dim=0)
+        dilated_input = torch.stack(tuple(
+            map(lambda m: m.flatten(start_dim=0, end_dim=1),
+                input_x.split(rate))),
+                                    dim=0)
 
-        h = torch.zeros(
-            (dilated_input.size(1), self.hidden_size),
-            device=self.device,
-            dtype=self.dtype)
-        c = torch.zeros(
-            (dilated_input.size(1), self.hidden_size),
-            device=self.device,
-            dtype=self.dtype)
+        h = torch.zeros((dilated_input.size(1), self.hidden_size),
+                        device=self.device,
+                        dtype=self.dtype)
+        c = torch.zeros((dilated_input.size(1), self.hidden_size),
+                        device=self.device,
+                        dtype=self.dtype)
         hs = []
 
         for i in range(dilated_input.size(0)):

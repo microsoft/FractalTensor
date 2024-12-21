@@ -4,21 +4,21 @@
 # --------------------------------------------------------------------------
 
 import context
+from flash_attention_utils import *
 
 import kaleido
 from kaleido import Tensor
 from kaleido import operations as ops
 
-from flash_attention_utils import *
 
-
-def attn_func(prev_maxes: Tensor['64, 1', float, 'cpu'],
-              prev_sums: Tensor['64, 1', float, 'cpu'],
-              prev_out: Tensor['64, 32', float, 'cpu'],
-              query: Tensor['64, 32', float, 'cpu'],
-              key: Tensor['64, 32', float, 'cpu'],
-              value: Tensor['64, 32', float, 'cpu']
-              ) -> Tensor['64, 32', float, 'cpu']:
+def attn_func(
+        prev_maxes: Tensor['64, 1', float,
+                           'cpu'], prev_sums: Tensor['64, 1', float, 'cpu'],
+        prev_out: Tensor['64, 32', float, 'cpu'],
+        query: Tensor['64, 32', float, 'cpu'], key: Tensor['64, 32', float,
+                                                           'cpu'],
+        value: Tensor['64, 32', float,
+                      'cpu']) -> Tensor['64, 32', float, 'cpu']:
     # ==============  softmax for the current block  ====================#
     attn_weights = query @ key.T  # q@K^T
     cur_maxes = ops.max(attn_weights, dim=-1, keepdim=True)  # m(x_cur)
@@ -44,25 +44,27 @@ def attn_func(prev_maxes: Tensor['64, 1', float, 'cpu'],
     return new_maxes, new_sums, o
 
 
-def per_block_func(query: Tensor['64, 32', float, 'cpu'],
-                   ks: FractalTensor[Tensor['64, 32', float, 'cpu']],
-                   vs: FractalTensor[Tensor['64, 32', float, 'cpu']]
-                   ) -> FractalTensor[Tensor['64, 32', float, 'cpu']]:
+def per_block_func(
+    query: Tensor['64, 32', float,
+                  'cpu'], ks: FractalTensor[Tensor['64, 32', float, 'cpu']],
+    vs: FractalTensor[Tensor['64, 32', float, 'cpu']]
+) -> FractalTensor[Tensor['64, 32', float, 'cpu']]:
     init_sum = ops.zeros(shape=(64, 1), device='cpu')
-    init_max = ops.full(
-        shape=(64, 1), fill_value=-kaleido.float32.max, device='cpu')
+    init_max = ops.full(shape=(64, 1),
+                        fill_value=-kaleido.float32.max,
+                        device='cpu')
     init_o = ops.zeros(shape=(64, 32), device='cpu')
-    _, _, o = ops.reduce(
-        lambda state, kvs: attn_func(*state, query, *kvs),
-        ops.zip(ks, vs),
-        initializer=(init_sum, init_max, init_o))
+    _, _, o = ops.reduce(lambda state, kvs: attn_func(*state, query, *kvs),
+                         ops.zip(ks, vs),
+                         initializer=(init_sum, init_max, init_o))
     return o
 
 
 def per_head_func(
-        qs: FractalTensor[Tensor['64, 32', float, 'cpu']],
-        ks: FractalTensor[Tensor['64, 32', float, 'cpu']],
-        vs: FractalTensor[Tensor['64, 32', float, 'cpu']]
+    qs: FractalTensor[Tensor['64, 32', float, 'cpu']],
+    ks: FractalTensor[Tensor['64, 32', float,
+                             'cpu']], vs: FractalTensor[Tensor['64, 32', float,
+                                                               'cpu']]
 ) -> FractalTensor[FractalTensor[Tensor['64, 32', float, 'cpu']]]:
     # qs, ks, bs: query, key, value blocks, each block has a shape of [64, 32]
     # iterate over blocks in a query
@@ -71,12 +73,14 @@ def per_head_func(
 
 
 def flash_attention(
-        qsss: FractalTensor[FractalTensor[FractalTensor[Tensor[
-            '64, 32', float, 'cpu']]]], ksss: FractalTensor[FractalTensor[
-                FractalTensor[Tensor['64, 32', float, 'cpu']]]],
-        vsss: FractalTensor[FractalTensor[FractalTensor[Tensor[
-            '64, 32', float, 'cpu']]]]) -> FractalTensor[FractalTensor[
-                FractalTensor[Tensor['64, 32', float, 'cpu']]]]:
+    qsss: FractalTensor[FractalTensor[FractalTensor[Tensor['64, 32', float,
+                                                           'cpu']]]],
+    ksss: FractalTensor[FractalTensor[FractalTensor[Tensor['64, 32', float,
+                                                           'cpu']]]],
+    vsss: FractalTensor[FractalTensor[FractalTensor[Tensor['64, 32', float,
+                                                           'cpu']]]]
+) -> FractalTensor[FractalTensor[FractalTensor[Tensor['64, 32', float,
+                                                      'cpu']]]]:
     # iterate over training samples and heads
     osss = ops.map(
         lambda xss: ops.map(lambda xs: per_head_func(*xs), ops.zip(*xss)),
@@ -89,11 +93,20 @@ if __name__ == '__main__':
     # depth-1: batch_size
     # depth-2: num_heads
     # depth-3: block_num = length / block_dim
-    qsss = create_input(
-        head_dim=32, num_heads=8, block_dim=64, seq_len=1024, batch_size=2)
-    ksss = create_input(
-        head_dim=32, num_heads=8, block_dim=64, seq_len=1024, batch_size=2)
-    vsss = create_input(
-        head_dim=32, num_heads=8, block_dim=64, seq_len=1024, batch_size=2)
+    qsss = create_input(head_dim=32,
+                        num_heads=8,
+                        block_dim=64,
+                        seq_len=1024,
+                        batch_size=2)
+    ksss = create_input(head_dim=32,
+                        num_heads=8,
+                        block_dim=64,
+                        seq_len=1024,
+                        batch_size=2)
+    vsss = create_input(head_dim=32,
+                        num_heads=8,
+                        block_dim=64,
+                        seq_len=1024,
+                        batch_size=2)
 
     osss = flash_attention(qsss, ksss, vsss)

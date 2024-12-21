@@ -5,33 +5,35 @@
 
 from __future__ import print_function
 
+from collections import OrderedDict
+from typing import NamedTuple, Tuple
+
+import torch
 from context import *
 
-from typing import Tuple, NamedTuple
-from collections import OrderedDict
-import torch
-
 import kaleido
+from kaleido import FractalTensor, Tensor
 from kaleido import operations as ops
-from kaleido import Tensor, FractalTensor
-from kaleido.frontend.types import TensorStorage, FractalTensorStorage
-from kaleido.parser.errors import *
+from kaleido.frontend.types import FractalTensorStorage, TensorStorage
 from kaleido.parser.ast_visitor import FunctionDefVisitor
-
+from kaleido.parser.errors import *
 from kaleido.parser.tests.utils import get_ast
 
 
 #========== valiad input and return arguments
-def f0(x: Tuple[FractalTensor[Tensor['1, 24', float, 'cuda']], Tensor[
-        '27, 56', float, 'cpu']], y: Tensor['1, 512', float, 'cpu']
-       ) -> Tuple[Tensor['4, 5', float, 'cuda'], FractalTensor[FractalTensor[
-           Tensor['1, 64', float, 'cuda']]]]:
+def f0(
+    x: Tuple[FractalTensor[Tensor['1, 24', float, 'cuda']],
+             Tensor['27, 56', float, 'cpu']], y: Tensor['1, 512', float, 'cpu']
+) -> Tuple[Tensor['4, 5', float, 'cuda'], FractalTensor[FractalTensor[Tensor[
+        '1, 64', float, 'cuda']]]]:
     pass
 
 
-def f1(xs: Tuple[FractalTensor[Tensor['2, 23', float, 'cpu']], Tuple[Tensor[
-        '3, 13', float, 'cpu'], Tensor['3, 13', float, 'cpu']]]
-       ) -> FractalTensor[Tensor['2, 23', float, 'cpu']]:
+def f1(
+    xs: Tuple[FractalTensor[Tensor['2, 23', float, 'cpu']],
+              Tuple[Tensor['3, 13', float, 'cpu'], Tensor['3, 13', float,
+                                                          'cpu']]]
+) -> FractalTensor[Tensor['2, 23', float, 'cpu']]:
     pass
 
 
@@ -57,8 +59,8 @@ class Type1(NamedTuple):
     a: Tensor['5000, 64', float, 'cpu']
 
     b: FractalTensor[FractalTensor[Tensor['512, 512', float, 'cpu']]]
-    c: Tuple[Tensor['1, 128', float, 'cpu'], FractalTensor[FractalTensor[
-        Tensor['512, 512', float, 'cpu']]]]
+    c: Tuple[Tensor['1, 128', float, 'cpu'],
+             FractalTensor[FractalTensor[Tensor['512, 512', float, 'cpu']]]]
 
 
 @kaleido.params(ctx1)
@@ -68,6 +70,7 @@ class Type2(NamedTuple):
 
 
 class TestParseFunDef(unittest.TestCase):
+
     def return_ir(self, f):
         ctx = kaleido.Context()
         visitor = FunctionDefVisitor(ctx)

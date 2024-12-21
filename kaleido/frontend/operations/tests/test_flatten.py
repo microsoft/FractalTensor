@@ -5,17 +5,20 @@
 
 from __future__ import print_function
 
-from context import *
 import torch
+from context import *
 
 from kaleido import FractalTensor
 
 
 class TestFlatten(unittest.TestCase):
+
     def create_data(self):
         shape = [3, 4]
-        dtype = kaleido.TensorStorage(
-            shape, kaleido.float32, device='cpu', order='row')
+        dtype = kaleido.TensorStorage(shape,
+                                      kaleido.float32,
+                                      device='cpu',
+                                      order='row')
 
         count = 0
 

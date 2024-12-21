@@ -7,12 +7,13 @@ from __future__ import print_function
 
 from context import *
 
-from kaleido.frontend.types import Real, Int, Bool
+from kaleido.frontend.types import Bool, Int, Real
 
 device = 'cpu'
 
 
 class Test1(unittest.TestCase):
+
     def test_basic_type(self):
         self.assertFalse(Real(64).is_equal_type(Int(32)))
         self.assertFalse(Real(64).is_equal_type(Real(32)))

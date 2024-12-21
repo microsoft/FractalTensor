@@ -3,18 +3,17 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import torch
-import torch.nn as nn
-from torch.nn import Parameter
-from torch.nn.init import xavier_normal_ as init
-from torch import Tensor
-
-import triton
-import triton.language as tl
-
+import os
 from time import time
 
-import os
+import torch
+import torch.nn as nn
+import triton
+import triton.language as tl
+from torch import Tensor
+from torch.nn import Parameter
+from torch.nn.init import xavier_normal_ as init
+
 __all__ = ['Vanilla_scan']
 
 
@@ -217,28 +216,28 @@ __all__ = ['Vanilla_scan']
 )
 @triton.jit
 def Vanilla_scan_kernel(
-        W_ptr,
-        U_ptr,
-        b_ptr,
-        x_ptr,
-        y_ptr,
-        state_ptr,
-        h_x_ptr,
-        h_y_ptr,
-        hidden_size,
-        batch_size,
-        grid_dim,
-        stride_wk,
-        stride_wn,
-        stride_uk,
-        stride_un,
-        stride_xm,
-        stride_xk,
-        stride_sm,
-        stride_sk,
-        BLOCK_SIZE_B: tl.constexpr,
-        BLOCK_SIZE_H: tl.constexpr,
-        BLOCK_SIZE_K: tl.constexpr,
+    W_ptr,
+    U_ptr,
+    b_ptr,
+    x_ptr,
+    y_ptr,
+    state_ptr,
+    h_x_ptr,
+    h_y_ptr,
+    hidden_size,
+    batch_size,
+    grid_dim,
+    stride_wk,
+    stride_wn,
+    stride_uk,
+    stride_un,
+    stride_xm,
+    stride_xk,
+    stride_sm,
+    stride_sk,
+    BLOCK_SIZE_B: tl.constexpr,
+    BLOCK_SIZE_H: tl.constexpr,
+    BLOCK_SIZE_K: tl.constexpr,
 ):
     pid_m = tl.program_id(0)
     pid_h = tl.program_id(1)
@@ -283,10 +282,10 @@ def Vanilla_scan_kernel(
         block_shape=(BLOCK_SIZE_B, BLOCK_SIZE_K),
         order=(1, 0),
     )
-    offset_batch = (
-        pid_m * BLOCK_SIZE_B + tl.arange(0, BLOCK_SIZE_B)) % batch_size
-    offset_hidden = (
-        pid_h * BLOCK_SIZE_H + tl.arange(0, BLOCK_SIZE_H)) % hidden_size
+    offset_batch = (pid_m * BLOCK_SIZE_B +
+                    tl.arange(0, BLOCK_SIZE_B)) % batch_size
+    offset_hidden = (pid_h * BLOCK_SIZE_H +
+                     tl.arange(0, BLOCK_SIZE_H)) % hidden_size
     b_ptrs = b_ptr + offset_hidden[None, :]
     b = tl.load(b_ptrs)
     b_ = tl.broadcast_to(b, (BLOCK_SIZE_B, BLOCK_SIZE_H))
@@ -312,10 +311,10 @@ def Vanilla_scan_kernel(
     h_x = _tanh(h_x + temp)
     h_y = _tanh(h_y + temp)
 
-    h_x_ptrs = h_x_ptr + offset_batch[:,
-                                      None] * stride_xm + offset_hidden[None, :] * stride_xk
-    h_y_ptrs = h_y_ptr + offset_batch[:,
-                                      None] * stride_xm + offset_hidden[None, :] * stride_xk
+    h_x_ptrs = h_x_ptr + offset_batch[:, None] * stride_xm + offset_hidden[
+        None, :] * stride_xk
+    h_y_ptrs = h_y_ptr + offset_batch[:, None] * stride_xm + offset_hidden[
+        None, :] * stride_xk
     tl.store(h_x_ptrs, h_x)
     tl.store(h_y_ptrs, h_y)
 
@@ -352,7 +351,8 @@ def Vanilla_scan(weight_,
     h_x, h_y = resident_
     hidden_size, batch_size, grid_dim = size_
     grid = lambda META: (
-        triton.cdiv(batch_size, META['BLOCK_SIZE_B']), triton.cdiv(hidden_size, META['BLOCK_SIZE_H']),
+        triton.cdiv(batch_size, META['BLOCK_SIZE_B']),
+        triton.cdiv(hidden_size, META['BLOCK_SIZE_H']),
     )
     Vanilla_scan_kernel[grid](
         W_ptr=W,

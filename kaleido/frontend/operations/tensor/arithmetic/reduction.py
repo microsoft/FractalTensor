@@ -3,12 +3,9 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import kaleido
-import pdb
 from kaleido.frontend.operations.base import Reduction
 
 __all__ = [
@@ -41,11 +38,15 @@ softmax = Softmax()
 
 
 class LayerNorm(Reduction):
+
     def __call__(self, x, w, b, eps=1e-6):
         t = super(LayerNorm, self).__call__(x)
 
-        t.data = torch.nn.functional.layer_norm(
-            x.data, x.shape, weight=w.data, bias=b.data, eps=eps)
+        t.data = torch.nn.functional.layer_norm(x.data,
+                                                x.shape,
+                                                weight=w.data,
+                                                bias=b.data,
+                                                eps=eps)
         #TODO(ying) Fix shape inference.
         t._type._shape = list(t.data.shape)
         t.recompute_strides()

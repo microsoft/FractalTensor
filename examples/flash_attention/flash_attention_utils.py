@@ -6,10 +6,7 @@
 import torch
 
 import kaleido
-from kaleido import FractalTensor
-from kaleido import TensorStorage
-
-from kaleido import FractalTensorStorage
+from kaleido import FractalTensor, FractalTensorStorage, TensorStorage
 
 
 def create_input(head_dim: int,
@@ -24,8 +21,9 @@ def create_input(head_dim: int,
     xsss = FractalTensor(
         FractalTensorStorage(
             FractalTensorStorage(
-                TensorStorage(
-                    (block_dim, head_dim), kaleido.float32, device=device))))
+                TensorStorage((block_dim, head_dim),
+                              kaleido.float32,
+                              device=device))))
     indices = []
     block_num = int(seq_len / block_dim)
     for _ in range(batch_size):

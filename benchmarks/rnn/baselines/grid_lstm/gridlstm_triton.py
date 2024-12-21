@@ -3,17 +3,14 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from time import time
-import unittest
-import torch
-import logging
 import argparse
+import logging
+import unittest
+from time import time
 
+import torch
+from torch.profiler import ProfilerActivity, profile, record_function
 from triton_model import StackedGridModel
-
-from torch.profiler import profile
-from torch.profiler import record_function
-from torch.profiler import ProfilerActivity
 
 
 def str2bool(v):
@@ -29,20 +26,27 @@ def str2bool(v):
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='Girdlstm')
-    parser.add_argument(
-        '--seq_len', type=int, help='Sequence length', default=10)
-    parser.add_argument(
-        '--batch_size', type=int, help='Batch size', default=32)
-    parser.add_argument(
-        '--hidden_size', type=int, help='Hidden size', default=256)
+    parser.add_argument('--seq_len',
+                        type=int,
+                        help='Sequence length',
+                        default=10)
+    parser.add_argument('--batch_size',
+                        type=int,
+                        help='Batch size',
+                        default=32)
+    parser.add_argument('--hidden_size',
+                        type=int,
+                        help='Hidden size',
+                        default=256)
     parser.add_argument('--depth', type=int, help='Depth size', default=4)
-    parser.add_argument(
-        '--output_file', type=str, help='Output file path', default=None)
-    parser.add_argument(
-        '--default_test',
-        type=str2bool,
-        help='Whether to run the default test',
-        default=False)
+    parser.add_argument('--output_file',
+                        type=str,
+                        help='Output file path',
+                        default=None)
+    parser.add_argument('--default_test',
+                        type=str2bool,
+                        help='Whether to run the default test',
+                        default=False)
     return parser.parse_args()
 
 
@@ -133,10 +137,11 @@ class TritonGrid(unittest.TestCase):
             ]:
                 target = torch.randn(*self.shape, device=device)
                 source = torch.randn(*self.shape, device=device)
-                model = StackedGridModel(
-                    TritonGrid.DEPTH, TritonGrid.SEQ_LEN, TritonGrid.SEQ_LEN,
-                    TritonGrid.BATCH_SIZE, TritonGrid.HIDDEN_SIZE,
-                    device).to(device)
+                model = StackedGridModel(TritonGrid.DEPTH, TritonGrid.SEQ_LEN,
+                                         TritonGrid.SEQ_LEN,
+                                         TritonGrid.BATCH_SIZE,
+                                         TritonGrid.HIDDEN_SIZE,
+                                         device).to(device)
                 test_name = f"gridlstm_{device}_forward"
                 test_case = [
                     TritonGrid.SEQ_LEN, TritonGrid.BATCH_SIZE,

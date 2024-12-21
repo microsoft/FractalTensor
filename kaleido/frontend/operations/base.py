@@ -3,13 +3,13 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 from typing import Tuple
-import kaleido
+
 import torch
+
+import kaleido
 
 __all__ = [
     'Elementwise',
@@ -21,6 +21,7 @@ __all__ = [
 
 
 class BaseOp(object):
+
     def check_inputs(self, *inputs: Tuple):
         for x in inputs:
             if not isinstance(x, kaleido.Tensor):
@@ -45,6 +46,7 @@ class Access(object):
 
 
 class Elementwise(BaseOp):
+
     def __call__(self, *xs, **kwargs):
         self.check_inputs(*xs)
         shape = xs[0].shape
@@ -59,6 +61,7 @@ class Elementwise(BaseOp):
 
 
 class Contraction(BaseOp):
+
     def __call__(self, *xs, **kwargs):
         self.check_inputs(*xs)
         super(Contraction, self).__call__(*xs, **kwargs)
@@ -69,6 +72,7 @@ class Contraction(BaseOp):
 
 
 class Reduction(BaseOp):
+
     def __call__(self, *xs, **kwargs):
         self.check_inputs(*xs)
         super(Reduction, self).__call__(*xs, **kwargs)
@@ -78,6 +82,7 @@ class Reduction(BaseOp):
 
 
 class Broadcast(BaseOp):
+
     def __call__(self, *xs, **kwargs):
         """
         The first input is a small Tensor, while the second Tensor is a larger

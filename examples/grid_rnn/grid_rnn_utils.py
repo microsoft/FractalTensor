@@ -8,8 +8,8 @@ import random
 import torch
 
 import kaleido
-from kaleido import Tensor
 from examples.utils import gen_dataset
+from kaleido import Tensor
 
 device = 'cpu'
 # device = 'cuda'

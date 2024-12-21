@@ -3,12 +3,13 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import torch
-import torch.nn as nn
-from torch.nn.init import xavier_normal_ as init
-import torch.jit as jit
 from typing import List, Tuple
+
+import torch
+import torch.jit as jit
+import torch.nn as nn
 from torch import Tensor
+from torch.nn.init import xavier_normal_ as init
 
 __all__ = [
     'LSTMCell',
@@ -18,6 +19,7 @@ __all__ = [
 
 
 class LSTMCell(jit.ScriptModule):
+
     def __init__(self, input_size: int, hidden_size: int):
         super(LSTMCell, self).__init__()
         self.Wi = init(nn.Parameter(torch.Tensor(input_size, hidden_size)))
@@ -57,16 +59,17 @@ class LSTMCell(jit.ScriptModule):
 
 
 class LSTMLayer(jit.ScriptModule):
+
     def __init__(self, *cell_args):
         super().__init__()
         self.cell = LSTMCell(*cell_args)
 
     @jit.script_method
     def forward(
-            self,
-            input: Tensor,
-            h: Tensor,
-            c: Tensor,
+        self,
+        input: Tensor,
+        h: Tensor,
+        c: Tensor,
     ) -> Tuple[Tensor, Tensor]:
         hiddens = []
         states = []
@@ -78,6 +81,7 @@ class LSTMLayer(jit.ScriptModule):
 
 
 class StackedLSTM(jit.ScriptModule):
+
     def __init__(self, input_size, hidden_size):
         super().__init__()
         self.layer1 = LSTMLayer(input_size, hidden_size)

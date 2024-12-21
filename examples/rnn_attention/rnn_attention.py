@@ -3,16 +3,15 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import context
+from typing import NamedTuple, Tuple
 
-from typing import Tuple, NamedTuple
+import context
+from rnn_attention_utils import *
 
 import kaleido
-from kaleido import Tensor, FractalTensor
+from kaleido import FractalTensor, Tensor
 from kaleido import operations as ops
 from kaleido.parser.plot import PlotProgram
-
-from rnn_attention_utils import *
 
 ctx = kaleido.Context()
 
@@ -37,19 +36,20 @@ class ModelParams(NamedTuple):
 
 
 # @kaleido.function(ctx)
-def cell(state: Tensor['1, 512', float, 'cpu'],
-         hidden: Tensor['1, 512', float, 'cpu'],
-         i2h: Tensor['512, 512', float, 'cpu'],
-         h2h: Tensor['512, 512', float, 'cpu'],
-         bias: Tensor['1, 512', float, 'cpu']
-         ) -> Tensor['1, 512', float, 'cpu']:
+def cell(
+        state: Tensor['1, 512', float, 'cpu'], hidden: Tensor['1, 512', float,
+                                                              'cpu'],
+        i2h: Tensor['512, 512', float, 'cpu'], h2h: Tensor['512, 512', float,
+                                                           'cpu'],
+        bias: Tensor['1, 512', float,
+                     'cpu']) -> Tensor['1, 512', float, 'cpu']:
     h = ops.tanh(hidden @ i2h + state @ h2h + bias)
     return h
 
 
 # @kaleido.function(ctx)
-def attn_func(state: Tensor['1, 512', float, 'cpu'],
-              cur: Tensor['1, 512', float, 'cpu'],
+def attn_func(state: Tensor['1, 512', float, 'cpu'], cur: Tensor['1, 512',
+                                                                 float, 'cpu'],
               encoders: FractalTensor[Tensor['1, 512', float, 'cpu']],
               trg_params: CellParams) -> Tensor['1, 512', float, 'cpu']:
 
@@ -66,34 +66,38 @@ def attn_func(state: Tensor['1, 512', float, 'cpu'],
 
 
 # @kaleido.function(ctx)
-def attn_layer(srcs: FractalTensor[Tensor['1, 512', float, 'cpu']],
-               trgs: FractalTensor[Tensor['1, 512', float, 'cpu']],
-               trg_params: CellParams
-               ) -> FractalTensor[Tensor['1, 512', float, 'cpu']]:
-    attn = ops.scan(
-        lambda s, x: attn_func(s, x, srcs, trg_params),
-        trgs,
-        initializer=ops.zeros(shape=(1, 512), device='cpu'))
+def attn_layer(
+        srcs: FractalTensor[Tensor['1, 512', float, 'cpu']],
+        trgs: FractalTensor[Tensor['1, 512', float,
+                                   'cpu']], trg_params: CellParams
+) -> FractalTensor[Tensor['1, 512', float, 'cpu']]:
+    attn = ops.scan(lambda s, x: attn_func(s, x, srcs, trg_params),
+                    trgs,
+                    initializer=ops.zeros(shape=(1, 512), device='cpu'))
     return attn
 
 
 # @kaleido.function(ctx)
-def model(src_words: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
-          trg_words: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
-          params: ModelParams
-          ) -> FractalTensor[FractalTensor[Tensor['1, 512', float, 'cpu']]]:
-    src_embs = ops.map(lambda xs: ops.map(lambda x:
-        ops.index(ops.slices(params.src_emb, dim=0), x),
-        xs), src_words)
+def model(
+    src_words: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
+    trg_words: FractalTensor[FractalTensor[Tensor['1,', int,
+                                                  'cpu']]], params: ModelParams
+) -> FractalTensor[FractalTensor[Tensor['1, 512', float, 'cpu']]]:
+    src_embs = ops.map(
+        lambda xs: ops.map(
+            lambda x: ops.index(ops.slices(params.src_emb, dim=0), x), xs),
+        src_words)
 
-    trg_embs = ops.map(lambda xs: ops.map(lambda x:
-        ops.index(ops.slices(params.trg_emb, dim=0), x),
-        xs), trg_words)
+    trg_embs = ops.map(
+        lambda xs: ops.map(
+            lambda x: ops.index(ops.slices(params.trg_emb, dim=0), x), xs),
+        trg_words)
 
-    src_enc_outs = ops.map(lambda xs: ops.scan(
-        lambda s, x: cell(s, x, *params.src_params),
-        xs,
-        initializer=ops.zeros(shape=(1,512), device='cpu')), src_embs)
+    src_enc_outs = ops.map(
+        lambda xs: ops.scan(lambda s, x: cell(s, x, *params.src_params),
+                            xs,
+                            initializer=ops.zeros(shape=(1, 512), device='cpu')
+                            ), src_embs)
 
     yss = ops.map(lambda x: attn_layer(*x, params.trg_params),
                   ops.zip(src_enc_outs, trg_embs))
@@ -105,10 +109,9 @@ def model(src_words: FractalTensor[FractalTensor[Tensor['1,', int, 'cpu']]],
 # p.plot(block)
 
 if __name__ == '__main__':
-    params = ModelParams(
-        src_emb=src_emb,
-        trg_emb=trg_emb,
-        src_params=CellParams(**create_cell_param()),
-        trg_params=CellParams(**create_cell_param()),
-        attn_params=attn_params)
+    params = ModelParams(src_emb=src_emb,
+                         trg_emb=trg_emb,
+                         src_params=CellParams(**create_cell_param()),
+                         trg_params=CellParams(**create_cell_param()),
+                         attn_params=attn_params)
     out = model(src_words, trg_words, params)

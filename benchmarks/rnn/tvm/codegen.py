@@ -4,15 +4,14 @@
 # --------------------------------------------------------------------------
 
 import json
-import numpy as np
 
-import tvm
-from tvm.relay.frontend.pytorch import from_pytorch
-import tvm.contrib.graph_executor as runtime
-from utils import get_logger
-
-import torch
 import lstm
+import numpy as np
+import torch
+import tvm
+import tvm.contrib.graph_executor as runtime
+from tvm.relay.frontend.pytorch import from_pytorch
+from utils import get_logger
 
 seq_len = 100
 batch_size = 128
@@ -53,20 +52,21 @@ def lstm_cell():
 
         with open('lstm_cell_relay_build.json', 'w', encoding='utf-8') as f:
             graph_str = lib.get_graph_json()
-            data = json.dumps(
-                json.loads(graph_str), ensure_ascii=False, indent=4)
+            data = json.dumps(json.loads(graph_str),
+                              ensure_ascii=False,
+                              indent=4)
             f.write(data)
 
 
 def test_lstm_cell():
     lib = tvm.runtime.load_module('lstm_cell.so')
 
-    x = np.random.uniform(
-        -1, 1, size=(batch_size, input_size)).astype('float32')
-    h_prev = np.random.uniform(
-        -1, 1, size=(batch_size, hidden_size)).astype('float32')
-    c_prev = np.random.uniform(
-        -1, 1, size=(batch_size, hidden_size)).astype('float32')
+    x = np.random.uniform(-1, 1,
+                          size=(batch_size, input_size)).astype('float32')
+    h_prev = np.random.uniform(-1, 1, size=(batch_size,
+                                            hidden_size)).astype('float32')
+    c_prev = np.random.uniform(-1, 1, size=(batch_size,
+                                            hidden_size)).astype('float32')
 
     dev = tvm.cuda()
     module = runtime.GraphModule(lib["default"](dev))  # cast into GraphModule
@@ -78,8 +78,8 @@ def test_lstm_cell():
     module.set_input('c_prev', tvm.nd.array(c_prev))
     prof_res = np.array(
         ftimer().results) * 1000  # multiply 1000 for converting to millisecond
-    print("%-20s %-19s" % ("%.4f ms" % np.mean(prof_res),
-                           "%.4f ms" % np.std(prof_res)))
+    print("%-20s %-19s" %
+          ("%.4f ms" % np.mean(prof_res), "%.4f ms" % np.std(prof_res)))
 
 
 def lstm_layer():
@@ -135,8 +135,8 @@ def stacked_lstm():
     with torch.no_grad():
         pt_rv = model(inp, h_inits, c_inits)
 
-    relay_model, params = from_pytorch(
-        torch.jit.script(model), input_shapes_stacked)
+    relay_model, params = from_pytorch(torch.jit.script(model),
+                                       input_shapes_stacked)
     logger.info('Stacked LSTM, relay text form:\n\n{}\n\n'.format(relay))
 
 

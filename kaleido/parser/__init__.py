@@ -3,25 +3,23 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from functools import wraps
 import ast
-import asttokens
-import inspect
-import astpretty
-import textwrap
 import collections
-
+import inspect
+import textwrap
+from collections.abc import Sequence
+from functools import wraps
 from typing import Dict, List
 
-from kaleido.parser.errors import *
-from kaleido.parser.context import Context
-from kaleido.parser.ir_nodes import NodeBase, BlockNode
+import astpretty
+import asttokens
+
 from kaleido.parser.ast_visitor import AstVisitor
-from collections.abc import Sequence
+from kaleido.parser.context import Context
+from kaleido.parser.errors import *
+from kaleido.parser.ir_nodes import BlockNode, NodeBase
 
 __all__ = [
     'Context',
@@ -31,6 +29,7 @@ __all__ = [
 
 
 class Parser(object):
+
     def __init__(self, func, ctx: Context, start_line_no=0):
         source_ = inspect.getsource(func)
         self.func = func
@@ -110,6 +109,7 @@ def params(context, *args, **kwargs):
         raise TypeError('Expected Context.')
 
     class ClassWrapper:
+
         def __init__(self, cls):
             self.wrapped_class = cls
 
@@ -123,4 +123,5 @@ def params(context, *args, **kwargs):
 
 
 from kaleido.parser.operations.common import import_all_modules_for_register
+
 import_all_modules_for_register()

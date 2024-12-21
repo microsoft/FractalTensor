@@ -6,20 +6,14 @@
 Tensor is a mathmetical concpet. Storage is its physical representation in
 computer.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from typing import List
-from typing import Tuple
-from typing import TypeVar
-from typing import Generic
+from typing import Generic, List, Tuple, TypeVar
 
 import torch
 
 import kaleido
-from kaleido.frontend.types import TensorStorage
-from kaleido.frontend.types import Number
+from kaleido.frontend.types import Number, TensorStorage
 
 __all__ = [
     'Tensor',
@@ -33,6 +27,7 @@ T = TypeVar('Tensor')
 
 
 class Tensor(Generic[Shape, DType, Device]):
+
     def __init__(
             self,
             shape: Tuple[int],
@@ -68,8 +63,11 @@ class Tensor(Generic[Shape, DType, Device]):
         if device not in ['cpu', 'cuda']:
             raise ValueError(f'Unsuported device: {device}.')
 
-        self._type = TensorStorage(
-            shape, dtype, strides=strides, order=order, device=device)
+        self._type = TensorStorage(shape,
+                                   dtype,
+                                   strides=strides,
+                                   order=order,
+                                   device=device)
 
         # physical storage of the underlying data. This could be thought as a
         # pointer to physical memory.

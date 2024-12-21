@@ -3,22 +3,18 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import Tuple
-
 import random
+from typing import NamedTuple, Tuple
+
 import torch
 
-from typing import NamedTuple
-
 import kaleido
-from kaleido import Tensor
-from kaleido import FractalTensor
-from kaleido import FractalTensorStorage
-from kaleido import TensorStorage
+from kaleido import FractalTensor, FractalTensorStorage, Tensor, TensorStorage
 from kaleido import operations as ops
 
 
-def gen_image_batch(tensor_shape: Tuple[int], batch_size: int,
+def gen_image_batch(tensor_shape: Tuple[int],
+                    batch_size: int,
                     device='cpu') -> FractalTensor[FractalTensor[Tensor]]:
     """Returns a batch of image in format of NCHW."""
     x = FractalTensor(

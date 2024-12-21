@@ -3,21 +3,20 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from tf_model.rnn import WhileOpLstmNet
-from tf_model.rnn import FineGrainedOpLstmNet
-from tf_model.rnn import StaticRNN
-import tensorflow as tf
-import test_utils as tu
-import math
 import gc
 import logging
-import sys
+import math
 import os
-from time import time
+import sys
 from collections import namedtuple
+from time import time
 
-import torch
 import pt_model as model
+import tensorflow as tf
+import test_utils as tu
+import torch
+from tf_model.rnn import FineGrainedOpLstmNet, StaticRNN, WhileOpLstmNet
+
 torch.manual_seed(1234)
 
 # supress tensorflow deprecation warning.
@@ -32,11 +31,10 @@ SEQ_LEN = 30
 
 logger = logging.getLogger()
 
-logging.basicConfig(
-    level=logging.INFO,
-    filename='figures/perf_with_increased_depth.tsv',
-    filemode='w',
-    format='%(message)s')
+logging.basicConfig(level=logging.INFO,
+                    filename='figures/perf_with_increased_depth.tsv',
+                    filemode='w',
+                    format='%(message)s')
 logger.info(('Depth\tTestName\tAvgTime\tThroughput\tRatio'))
 
 
@@ -54,12 +52,11 @@ def RunPyTorchTest(batch_size, seq_len, hidden, depth, cell_type):
 
     x = torch.randn(*input_shape, device=device)
 
-    m = model.small_model(
-        batch_size=batch_size,
-        cell_type=cell_type,
-        max_seq_length=seq_len,
-        hidden_size=hidden,
-        num_layers=depth).to(device)
+    m = model.small_model(batch_size=batch_size,
+                          cell_type=cell_type,
+                          max_seq_length=seq_len,
+                          hidden_size=hidden,
+                          num_layers=depth).to(device)
     m = torch.jit.script(m)
     m.eval()
 
@@ -79,8 +76,9 @@ def RunTensorFlowGraphTest(model, batch_size, seq_len, hidden, depth):
     stddev = 1.0 / math.sqrt(hidden)
 
     with tf.device(tu.device(dev)):
-        data = tf.random.uniform(
-            (seq_len, batch_size, hidden), minval=-stddev, maxval=stddev)
+        data = tf.random.uniform((seq_len, batch_size, hidden),
+                                 minval=-stddev,
+                                 maxval=stddev)
 
         output = model(data)
 
@@ -101,8 +99,9 @@ def RunTensorFlowEagerAutoGraphTest(model, batch_size, seq_len, hidden, depth):
     stddev = 1.0 / math.sqrt(hidden)
 
     with tf.device(tu.device(dev)):
-        data = tf.random.uniform(
-            (seq_len, batch_size, hidden), minval=-stddev, maxval=stddev)
+        data = tf.random.uniform((seq_len, batch_size, hidden),
+                                 minval=-stddev,
+                                 maxval=stddev)
 
         for i in range(5):  # warmup
             y = model(data)
@@ -122,8 +121,8 @@ def report(test_name, total_times):
     for t in total_times:
         raitos.append(t / base)
 
-    for i, (time, throughput, ratio) in enumerate(
-            zip(total_times, throughputs, raitos)):
+    for i, (time, throughput,
+            ratio) in enumerate(zip(total_times, throughputs, raitos)):
         logger.info('%d\t%s\t%.5f\t%.5f\t%.5f' %
                     (i + 1, test_name, time / ITERS * 1000, throughput, ratio))
 
@@ -163,8 +162,9 @@ if __name__ == '__main__':
 
     total_times = []
     for depth in range(1, max_depth + 1):
-        model = StaticRNN(
-            hidden_size=HIDDEN, num_layers=depth, use_cudnn_rnn=False)
+        model = StaticRNN(hidden_size=HIDDEN,
+                          num_layers=depth,
+                          use_cudnn_rnn=False)
         t = RunTensorFlowGraphTest(model, BATCH_SIZE, SEQ_LEN, HIDDEN, depth)
         total_times.append(t)
     report('TF_StaticLSTMCell', total_times)

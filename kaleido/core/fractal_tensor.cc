@@ -9,7 +9,7 @@ namespace kaleido {
 namespace core {
 
 std::string FractalTensor::DebugString() const {
-    return type_desc_.DebugString();
+  return type_desc_.DebugString();
 }
 
 }  // namespace core

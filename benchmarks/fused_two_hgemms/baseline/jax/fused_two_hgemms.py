@@ -3,14 +3,16 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
+import argparse
 import os
 import time
-import numpy as np
-import argparse
+
 import jax
+import jax.numpy as jnp
+import numpy as np
 import torch
 from jax import jit
-import jax.numpy as jnp
+
 jax.config.update("jax_enable_x64", True)
 
 os.environ['XLA_FLAGS'] = (
@@ -88,8 +90,10 @@ def run_test(test_case):
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='BacktoBack GEMMs')
-    parser.add_argument(
-        '--output_file', type=str, help='Output file path', default=None)
+    parser.add_argument('--output_file',
+                        type=str,
+                        help='Output file path',
+                        default=None)
     return parser.parse_args()
 
 

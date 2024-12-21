@@ -3,10 +3,11 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-from typing import NamedTuple, Tuple
 import math
+from typing import NamedTuple, Tuple
 
 import tensorflow as tf
+
 tf.compat.v1.disable_eager_execution()
 
 from tensorflow import Tensor, TensorArray
@@ -41,6 +42,7 @@ class OuterLoopArg(NamedTuple):
 
 
 class VanillaRNNCell(Layer):
+
     def __init__(self, hidden_size, grid_dim=2):
         """
         Args:
@@ -54,16 +56,16 @@ class VanillaRNNCell(Layer):
     def build(self, _):
         stddev = 1.0 / math.sqrt(self.hidden_size)
         with tf.name_scope('weight'):
-            self.W = tf.random.uniform(
-                [self.hidden_size, self.hidden_size],
-                minval=-stddev,
-                maxval=stddev)
+            self.W = tf.random.uniform([self.hidden_size, self.hidden_size],
+                                       minval=-stddev,
+                                       maxval=stddev)
             self.U = tf.random.uniform(
                 [self.hidden_size * self.grid_dim, self.hidden_size],
                 minval=-stddev,
                 maxval=stddev)
-            self.b = tf.random.uniform(
-                [1, self.hidden_size], minval=-stddev, maxval=stddev)
+            self.b = tf.random.uniform([1, self.hidden_size],
+                                       minval=-stddev,
+                                       maxval=stddev)
 
     def call(self, x_t: Tensor, y_t: Tensor,
              state: Tensor) -> Tuple[Tensor, Tensor]:
@@ -90,6 +92,7 @@ class VanillaRNNCell(Layer):
 
 
 class FineGrainedOpGridLSTMNet(tf.keras.Model):
+
     def __init__(self, depth: int, src_len: int, trg_len: int, batch_size: int,
                  hidden_size: int):
         super(FineGrainedOpGridLSTMNet, self).__init__()
@@ -140,13 +143,15 @@ class FineGrainedOpGridLSTMNet(tf.keras.Model):
 
                     h_x, h_y = self.cells[d](x_t, y_t, state)
                     temp = tf.stack([h_x, h_y], 0)
-                    tf.tensor_scatter_nd_update(
-                        self.h_output, [[d, i, j, 0], [d, i, j, 1]], temp)
+                    tf.tensor_scatter_nd_update(self.h_output,
+                                                [[d, i, j, 0], [d, i, j, 1]],
+                                                temp)
 
         return self.h_output
 
 
 class WhileOpGridLSTMNet(Layer):
+
     def __init__(self, depth: int, src_len: int, trg_len: int, batch_size: int,
                  hidden_size: int):
         super(WhileOpGridLSTMNet, self).__init__()
@@ -244,6 +249,7 @@ class WhileOpGridLSTMNet(Layer):
 
 
 class GridLSTMBlock(Layer):
+
     def __init__(self, hidden_size: int):
         super(GridLSTMBlock, self).__init__()
         self.hidden_size = hidden_size
@@ -273,12 +279,12 @@ class GridLSTMBlock(Layer):
         # shape: (batch_size, hidden_size), (batch_size, hidden_size)
         _, [next_t_h, next_t_m] = self.lstm_cell(target_step.step, (h, t_m))
 
-        return StepArg(
-            DimArg(next_t_h, next_t_h, next_t_m),
-            DimArg(next_s_h, next_s_h, next_s_m))
+        return StepArg(DimArg(next_t_h, next_t_h, next_t_m),
+                       DimArg(next_s_h, next_s_h, next_s_m))
 
 
 class GridLSTM(Layer):
+
     def __init__(self, hidden_size: int):
         super(GridLSTM, self).__init__()
         self.hidden_size = hidden_size
@@ -394,6 +400,7 @@ class GridLSTM(Layer):
 
 
 class BaseWhileOpGridLSTMNet(Layer):
+
     def __init__(self, hidden_size: int):
         super(BaseWhileOpGridLSTMNet, self).__init__()
 

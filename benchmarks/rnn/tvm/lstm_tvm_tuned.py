@@ -3,47 +3,50 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-import os
-import sys
-import logging
-import shutil
-from time import time
-import logging
 import argparse
+import logging
+import os
+import shutil
+import sys
+from time import time
 
-import torch
-from torch import nn
-
-import tvm
 import numpy as np
-from tvm import relay
-from tvm import auto_scheduler
+import torch
+import tvm
+from torch import nn
+from tvm import auto_scheduler, relay
 from tvm.contrib import graph_executor
 from tvm.relay import frontend
 
 DTYPE = 'float16'
 
 logger = logging.getLogger()
-logging.basicConfig(
-    level=logging.CRITICAL,
-    filename='logs/tvm_eval_log.txt',
-    filemode='w',
-    format='%(message)s')
+logging.basicConfig(level=logging.CRITICAL,
+                    filename='logs/tvm_eval_log.txt',
+                    filemode='w',
+                    format='%(message)s')
 
 
 def parse_test_args():
     parser = argparse.ArgumentParser(description='Girdlstm')
-    parser.add_argument(
-        '--seq_len', type=int, help='Sequence length', default=32)
-    parser.add_argument(
-        '--batch_size', type=int, help='Batch size', default=256)
-    parser.add_argument(
-        '--hidden_size', type=int, help='Hidden size', default=256)
+    parser.add_argument('--seq_len',
+                        type=int,
+                        help='Sequence length',
+                        default=32)
+    parser.add_argument('--batch_size',
+                        type=int,
+                        help='Batch size',
+                        default=256)
+    parser.add_argument('--hidden_size',
+                        type=int,
+                        help='Hidden size',
+                        default=256)
     parser.add_argument('--depth', type=int, help='Depth size', default=8)
     return parser.parse_args()
 
 
 class StackedLSTM(nn.Module):
+
     def __init__(self, input_size, hidden_size, depth):
         super(StackedLSTM, self).__init__()
 
@@ -53,8 +56,10 @@ class StackedLSTM(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
 
-        self.cell = nn.LSTM(
-            input_size, hidden_size, num_layers=depth, dtype=torch.float16)
+        self.cell = nn.LSTM(input_size,
+                            hidden_size,
+                            num_layers=depth,
+                            dtype=torch.float16)
 
     def forward(self, x):
         out, _ = self.cell(x)
@@ -130,15 +135,16 @@ def tune_and_export(log_file, code_file, lib_file, mod, params, target,
 
         # build module for code
         with relay.build_config(opt_level=3):
-            graph, lib_c, params = relay.build_module.build(
-                mod, target, params=params)
+            graph, lib_c, params = relay.build_module.build(mod,
+                                                            target,
+                                                            params=params)
 
     with open(code_file, 'w') as f:
         lib.export_library(lib_file)
         print(lib_c.imported_modules[0].get_source(), file=f)
         f.write(('\n total schedule time: %.6f s, tuning time: %.6f s, '
-                 'building time: %.6f s\n') % (search - start, tune - search,
-                                               built - tune))
+                 'building time: %.6f s\n') %
+                (search - start, tune - search, built - tune))
     print('Tune and export the library successfully!\n')
 
 
@@ -147,9 +153,8 @@ def evaluate_kernel(target: str, lib_file: str, batch_size: int,
     dev = tvm.device(str(target), 0)
     lib: tvm.runtime.Module = tvm.runtime.load_module(lib_file)
     module = graph_executor.GraphModule(lib['default'](dev))
-    x_tvm = tvm.nd.array(
-        (np.random.uniform(size=(seq_length, batch_size,
-                                 input_size))).astype(DTYPE))
+    x_tvm = tvm.nd.array((np.random.uniform(size=(seq_length, batch_size,
+                                                  input_size))).astype(DTYPE))
     module.set_input('input', x_tvm)
 
     logger.critical(
@@ -169,40 +174,37 @@ def tvm_tuned_stacked_lstm(batch_size: int, seq_length: int, hidden_size: int,
     # test_LSTM(input_size=64, hidden_size=32, depth=2)
 
     target = tvm.target.Target(target='cuda', host='llvm')
-    mod, params = get_model(
-        input_size=input_size,
-        hidden_size=hidden_size,
-        depth=depth,
-        seq_length=seq_length,
-        batch_size=batch_size)
+    mod, params = get_model(input_size=input_size,
+                            hidden_size=hidden_size,
+                            depth=depth,
+                            seq_length=seq_length,
+                            batch_size=batch_size)
     open(os.path.join(log_dir, prefix + '_mode.txt'), 'w').write(str(mod))
 
     if not os.path.exists(lib_file):
-        tune_and_export(
-            log_file,
-            code_file,
-            lib_file,
-            mod,
-            params,
-            target,
-            batch_size=batch_size,
-            seq_length=seq_length,
-            input_size=input_size,
-            hidden_size=hidden_size,
-            depth=depth)
+        tune_and_export(log_file,
+                        code_file,
+                        lib_file,
+                        mod,
+                        params,
+                        target,
+                        batch_size=batch_size,
+                        seq_length=seq_length,
+                        input_size=input_size,
+                        hidden_size=hidden_size,
+                        depth=depth)
 
     dev = tvm.device(str(target), 0)
     with tvm.transform.PassContext(opt_level=3):
         lib = relay.build(mod, target=target, params=params)
         lib.export_library(lib_file)
 
-    evaluate_kernel(
-        target,
-        lib_file,
-        batch_size=batch_size,
-        seq_length=seq_length,
-        input_size=input_size,
-        depth=depth)
+    evaluate_kernel(target,
+                    lib_file,
+                    batch_size=batch_size,
+                    seq_length=seq_length,
+                    input_size=input_size,
+                    depth=depth)
 
 
 if __name__ == '__main__':
